@@ -184,8 +184,10 @@ $user->subscription('main')->decrementQuantity();
 
 // Subtract five to the subscription's current quantity...
 $user->subscription('main')->decrementQuantity(5);
+```
 Alternatively, you may set a specific quantity using the updateQuantity method:
 
+```php
 $user->subscription('main')->updateQuantity(10);
 ```
 
