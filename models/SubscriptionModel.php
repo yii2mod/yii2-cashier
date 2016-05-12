@@ -172,6 +172,58 @@ class SubscriptionModel extends ActiveRecord
         }
     }
 
+    /**
+     * Increment the quantity of the subscription.
+     *
+     * @param int $count
+     * @return $this
+     */
+    public function incrementQuantity($count = 1)
+    {
+        $this->updateQuantity($this->quantity + $count);
+        return $this;
+    }
+
+    /**
+     *  Increment the quantity of the subscription, and invoice immediately.
+     *
+     * @param int $count
+     * @return $this
+     */
+    public function incrementAndInvoice($count = 1)
+    {
+        $this->incrementQuantity($count);
+        $this->user->invoice();
+        return $this;
+    }
+
+    /**
+     * Decrement the quantity of the subscription.
+     *
+     * @param int $count
+     * @return $this
+     */
+    public function decrementQuantity($count = 1)
+    {
+        $this->updateQuantity(max(1, $this->quantity - $count));
+        return $this;
+    }
+
+    /**
+     * Update the quantity of the subscription.
+     *
+     * @param int $quantity
+     * @return $this
+     */
+    public function updateQuantity($quantity)
+    {
+        $subscription = $this->asStripeSubscription();
+        $subscription->quantity = $quantity;
+        $subscription->save();
+        $this->quantity = $quantity;
+        $this->save();
+        return $this;
+    }
 
     /**
      * Indicate that the plan change should not be prorated.

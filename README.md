@@ -169,6 +169,28 @@ $user->subscription('main')
         ->swap('provider-plan-id');
 ```
 
+####Subscription Quantity
+
+Sometimes subscriptions are affected by "quantity". For example, your application might charge $10 per month per user on an account. To easily increment or decrement your subscription quantity, use the incrementQuantity and decrementQuantity methods:
+```php
+$user = User::findOne(1);
+
+$user->subscription('main')->incrementQuantity();
+
+// Add five to the subscription's current quantity...
+$user->subscription('main')->incrementQuantity(5);
+
+$user->subscription('main')->decrementQuantity();
+
+// Subtract five to the subscription's current quantity...
+$user->subscription('main')->decrementQuantity(5);
+Alternatively, you may set a specific quantity using the updateQuantity method:
+
+$user->subscription('main')->updateQuantity(10);
+```
+
+For more information on subscription quantities, consult the [Stripe documentation](https://stripe.com/docs/subscriptions/guide#setting-quantities).
+
 ####Subscription Taxes
 
 With Cashier, it's easy to provide the tax_percent value sent to Stripe. To specify the tax percentage a user pays on a subscription, implement the taxPercentage method on your billable model, and return a numeric value between 0 and 100, with no more than 2 decimal places.
