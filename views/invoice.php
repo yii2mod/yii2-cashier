@@ -4,8 +4,9 @@ use yii2mod\cashier\Cashier;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
-/* @var  $user \yii\db\ActiveRecord */
-/* @var  $invoice \yii2mod\cashier\Invoice */
+/* @var $user \yii\db\ActiveRecord */
+/* @var $invoice \yii2mod\cashier\Invoice */
+/* @var $subscription \yii2mod\cashier\InvoiceItem */
 ?>
 
 <!DOCTYPE html>
@@ -143,7 +144,8 @@ use yii\helpers\Html;
                     <?php foreach ($invoice->subscriptions() as $subscription): ?>
                         <tr>
                             <td>Subscription (<?php echo $subscription->quantity; ?>)</td>
-                            <td><?php echo $subscription->startDate(); ?> - <?php echo $subscription->endDate(); ?></td>
+                            <td><?php echo $subscription->startDateAsCarbon()->formatLocalized('%B %e, %Y'); ?>
+                                - <?php echo $subscription->endDateAsCarbon()->formatLocalized('%B %e, %Y'); ?></td>
                             <td><?php echo $subscription->total(); ?></td>
                         </tr>
                     <?php endforeach; ?>
