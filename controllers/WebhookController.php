@@ -46,7 +46,7 @@ class WebhookController extends Controller
      */
     public function actionHandleWebhook()
     {
-        $payload = Yii::$app->request->post();
+        $payload = json_decode(Yii::$app->request->getRawBody(), true);
         if (!$this->eventExistsOnStripe($payload['id'])) {
             return;
         }
