@@ -10,6 +10,7 @@ use Stripe\Customer;
 use Stripe\Error\InvalidRequest;
 use Stripe\Invoice as StripeInvoice;
 use Stripe\InvoiceItem as StripeInvoiceItem;
+use Stripe\Refund as StripeRefund;
 use Stripe\Token;
 use Yii;
 use yii\web\NotFoundHttpException;
@@ -43,14 +44,41 @@ trait Billable
         $options = array_merge([
             'currency' => $this->preferredCurrency(),
         ], $options);
+
         $options['amount'] = $amount;
+
         if (!array_key_exists('source', $options) && $this->stripeId) {
             $options['customer'] = $this->stripeId;
         }
+
         if (!array_key_exists('source', $options) && !array_key_exists('customer', $options)) {
             throw new InvalidArgumentException('No payment source provided.');
         }
+
         return Charge::create($options, ['api_key' => $this->getStripeKey()]);
+    }
+
+    /**
+     * Refund a customer for a charge.
+     *
+     * @param $charge
+     * @param array $options
+     * @return StripeRefund
+     */
+    public function refund($charge, array $options = [])
+    {
+        $options['charge'] = $charge;
+        return StripeRefund::create($options, ['api_key' => $this->getStripeKey()]);
+    }
+
+    /**
+     * Determines if the customer currently has a card on file.
+     *
+     * @return bool
+     */
+    public function hasCardOnFile()
+    {
+        return (bool)$this->cardBrand;
     }
 
     /**
@@ -75,7 +103,7 @@ trait Billable
             'currency' => $this->preferredCurrency(),
             'description' => $description,
         ], $options);
-        
+
         StripeInvoiceItem::create(
             $options, ['api_key' => $this->getStripeKey()]
         );
@@ -174,7 +202,7 @@ trait Billable
     {
         if ($this->stripeId) {
             try {
-                StripeInvoice::create(['customer' => $this->stripeId], $this->getStripeKey())->pay();
+                return StripeInvoice::create(['customer' => $this->stripeId], $this->getStripeKey())->pay();
             } catch (InvalidRequest $e) {
                 return false;
             }
@@ -311,11 +339,50 @@ trait Billable
         $source = $customer->default_source
             ? $customer->sources->retrieve($customer->default_source)
             : null;
-        if ($source) {
-            $this->cardBrand = $source->brand;
-            $this->cardLastFour = $source->last4;
-        }
+
+        $this->fillCardDetails($source);
+
         $this->save();
+    }
+
+    /**
+     * Synchronises the customer's card from Stripe back into the database.
+     *
+     * @return $this
+     */
+    public function updateCardFromStripe()
+    {
+        $customer = $this->asStripeCustomer();
+        $defaultCard = null;
+        foreach ($customer->sources->data as $card) {
+            if ($card->id === $customer->default_source) {
+                $defaultCard = $card;
+                break;
+            }
+        }
+        if ($defaultCard) {
+            $this->fillCardDetails($defaultCard)->save();
+        } else {
+            $this->cardBrand = null;
+            $this->cardLastFour = null;
+            $this->update(false);
+        }
+        return $this;
+    }
+
+    /**
+     * Fills the user's properties with the source from Stripe.
+     *
+     * @param \Stripe\Card|null $card
+     * @return $this
+     */
+    protected function fillCardDetails($card)
+    {
+        if ($card) {
+            $this->cardBrand = $card->brand;
+            $this->cardLastFour = $card->last4;
+        }
+        return $this;
     }
 
     /**
@@ -389,19 +456,25 @@ trait Billable
      */
     public function createAsStripeCustomer($token, array $options = [])
     {
-        $options = array_merge($options, ['email' => $this->email]);
+        $options = array_key_exists('email', $options)
+            ? $options : array_merge($options, ['email' => $this->email]);
+
         // Here we will create the customer instance on Stripe and store the ID of the
         // user from Stripe. This ID will correspond with the Stripe user instances
         // and allow us to retrieve users from Stripe later when we need to work.
         $customer = Customer::create($options, $this->getStripeKey());
+
         $this->stripeId = $customer->id;
+
         $this->save();
+
         // Next we will add the credit card to the user's account on Stripe using this
         // token that was provided to this method. This will allow us to bill users
         // when they subscribe to plans or we need to do one-off charges on them.
         if (!is_null($token)) {
             $this->updateCard($token);
         }
+
         return $customer;
     }
 
