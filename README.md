@@ -34,6 +34,33 @@ Stripe Configuration
 Before using Cashier, we'll also need to prepare the database.
 
 ```php
+$tableOptions = null;
+
+if ($this->db->driverName === 'mysql') {
+    $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
+}
+
+$this->createTable('Subscription', [
+    'id' => $this->primaryKey(),
+    'userId' => $this->integer()->notNull(),
+    'name' => $this->string()->notNull(),
+    'stripeId' => $this->string()->notNull(),
+    'stripePlan' => $this->string()->notNull(),
+    'quantity' => $this->integer()->notNull(),
+    'trialEndAt' => Schema::TYPE_TIMESTAMP . ' NULL DEFAULT NULL',
+    'endAt' => Schema::TYPE_TIMESTAMP . ' NULL DEFAULT NULL',
+    'createdAt' => Schema::TYPE_TIMESTAMP . ' NULL DEFAULT NULL',
+    'updatedAt' => Schema::TYPE_TIMESTAMP . ' NULL DEFAULT NULL',
+], $tableOptions);
+
+$this->addColumn('User', 'stripeId', $this->string());
+$this->addColumn('User', 'cardBrand', $this->string());
+$this->addColumn('User', 'cardLastFour', $this->string());
+$this->addColumn('User', 'trialEndAt', Schema::TYPE_TIMESTAMP . ' NULL DEFAULT NULL');
+```
+> Also you can apply migration by the following command:
+
+```php
 php yii migrate --migrationPath=@vendor/yii2mod/yii2-cashier/migrations
 ```
 
