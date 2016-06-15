@@ -459,8 +459,6 @@ Create the ```download-invoice``` action in the your controller, for example:
 ```php
 public function actionDownloadInvoice($invoiceId)
 {
-    $user = User::findOne(1);
-
     return $user->downloadInvoice($invoiceId, [
         'vendor' => 'Your Company',
         'product' => 'Your Product',
