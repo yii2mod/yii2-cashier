@@ -1,8 +1,10 @@
 <?php
 
 use yii\db\Migration;
-use yii\db\Schema;
 
+/**
+ * Class m160511_085953_init
+ */
 class m160511_085953_init extends Migration
 {
     public function up()
