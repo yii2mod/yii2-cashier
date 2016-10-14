@@ -219,9 +219,12 @@ class SubscriptionModel extends ActiveRecord
     {
         $subscription = $this->asStripeSubscription();
         $subscription->quantity = $quantity;
+        $subscription->prorate = $this->prorate;
         $subscription->save();
+
         $this->quantity = $quantity;
         $this->save();
+
         return $this;
     }
 
