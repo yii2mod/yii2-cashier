@@ -92,7 +92,11 @@ class SubscriptionModel extends ActiveRecord
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'createdAtAttribute' => 'createdAt',
                 'updatedAtAttribute' => 'updatedAt',
-                'value' => new Expression('NOW()'),
+                'value' => function () {
+                    $currentDateExpression = Yii::$app->db->getDriverName() === 'sqlite' ? "DATETIME('now')" : 'NOW()';
+
+                    return new Expression($currentDateExpression);
+                }
             ],
             'carbon' => [
                 'class' => CarbonBehavior::className(),
