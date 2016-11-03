@@ -35,14 +35,17 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'id' => 'testapp',
             'basePath' => __DIR__,
             'vendorPath' => $this->getVendorPath(),
+            'controllerMap' => [
+                'webhook' => 'yii2mod\cashier\controllers\WebhookController',
+            ],
             'components' => [
                 'db' => [
                     'class' => 'yii\db\Connection',
                     'dsn' => 'sqlite::memory:',
                 ],
                 'request' => [
-                    'hostInfo' => 'http://domain.com',
-                    'scriptUrl' => 'index.php'
+                    'scriptFile' => __DIR__ . '/index.php',
+                    'scriptUrl' => '/index.php',
                 ],
                 'user' => [
                     'identityClass' => 'yii2mod\cashier\tests\data\User',

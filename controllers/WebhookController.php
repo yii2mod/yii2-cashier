@@ -17,17 +17,13 @@ use yii\web\Response;
  */
 class WebhookController extends Controller
 {
-
     /**
      * @var bool whether to enable CSRF validation for the actions in this controller.
      */
     public $enableCsrfValidation = false;
 
     /**
-     * Returns a list of behaviors that this component should behave as.
-     *
-     * Child classes may override this method to specify the behaviors they want to behave as.
-     * @return array
+     * @inheritdoc
      */
     public function behaviors()
     {
@@ -43,6 +39,8 @@ class WebhookController extends Controller
 
     /**
      * Processing Stripe's callback and making membership updates according to payment data
+     *
+     * @return void|Response
      */
     public function actionHandleWebhook()
     {
@@ -61,7 +59,7 @@ class WebhookController extends Controller
     /**
      * Handle a cancelled customer from a Stripe subscription.
      *
-     * @param  array $payload
+     * @param array $payload
      * @return Response
      */
     protected function handleCustomerSubscriptionDeleted(array $payload)
@@ -86,21 +84,20 @@ class WebhookController extends Controller
     /**
      * Get the billable entity instance by Stripe ID.
      *
-     * @param  string $stripeId
+     * @param string $stripeId
      * @return null|static
      */
     protected function getUserByStripeId($stripeId)
     {
-        /* @var $model \yii\db\ActiveRecord */
         $model = Yii::$app->user->identityClass;
-        
+
         return $model::findOne(['stripeId' => $stripeId]);
     }
 
     /**
      * Verify with Stripe that the event is genuine.
      *
-     * @param  string $id
+     * @param string $id
      * @return bool
      */
     protected function eventExistsOnStripe($id)

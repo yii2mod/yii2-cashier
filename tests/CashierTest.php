@@ -5,6 +5,7 @@ namespace yii2mod\cashier\tests;
 use Carbon\Carbon;
 use Stripe\Token;
 use Yii;
+use yii2mod\cashier\tests\data\CashierTestControllerStub;
 use yii2mod\cashier\tests\data\User;
 
 class CashierTest extends TestCase
@@ -164,5 +165,65 @@ class CashierTest extends TestCase
         $customer = $user->asStripeCustomer();
 
         $this->assertEquals('coupon-1', $customer->discount->coupon->id);
+    }
+
+    public function testMarkingAsCancelledFromWebhook()
+    {
+        $user = User::findOne(['email' => 'johndoe@domain.com']);
+
+        $user->newSubscription('main', 'monthly-10-1')
+            ->create($this->getTestToken());
+
+        $subscription = $user->subscription('main');
+
+        Yii::$app->request->rawBody = json_encode([
+            'id' => 'foo',
+            'type' => 'customer.subscription.deleted',
+            'data' => [
+                'object' => [
+                    'id' => $subscription->stripeId,
+                    'customer' => $user->stripeId,
+                ],
+            ],
+        ]);
+        $controller = new CashierTestControllerStub('webhook', Yii::$app);
+        $response = $controller->actionHandleWebhook();
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $user->refresh();
+        $subscription = $user->subscription('main');
+
+        $this->assertTrue($subscription->cancelled());
+    }
+
+    public function testCreatingOneOffInvoices()
+    {
+        $user = User::findOne(['email' => 'johndoe@domain.com']);
+
+        // Create Invoice
+        $user->createAsStripeCustomer($this->getTestToken());
+        $user->invoiceFor('Yii2mod Cashier', 1000);
+
+        // Invoice Tests
+        $invoice = $user->invoices()[0];
+
+        $this->assertEquals('$10.00', $invoice->total());
+        $this->assertEquals('Yii2mod Cashier', $invoice->invoiceItems()[0]->asStripeInvoiceItem()->description);
+    }
+
+    public function testRefunds()
+    {
+        $user = User::findOne(['email' => 'johndoe@domain.com']);
+
+        // Create Invoice
+        $user->createAsStripeCustomer($this->getTestToken());
+        $invoice = $user->invoiceFor('Yii2mod Cashier', 1000);
+
+        // Create the refund
+        $refund = $user->refund($invoice->charge);
+
+        // Refund Tests
+        $this->assertEquals(1000, $refund->amount);
     }
 }
