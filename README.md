@@ -4,6 +4,7 @@ Yii2 Cashier
 This extension is the port of [Laravel's Cashier package](https://laravel.com/docs/5.2/billing)
 
 [![Latest Stable Version](https://poser.pugx.org/yii2mod/yii2-cashier/v/stable)](https://packagist.org/packages/yii2mod/yii2-cashier) [![Total Downloads](https://poser.pugx.org/yii2mod/yii2-cashier/downloads)](https://packagist.org/packages/yii2mod/yii2-cashier) [![License](https://poser.pugx.org/yii2mod/yii2-cashier/license)](https://packagist.org/packages/yii2mod/yii2-cashier)
+[![Build Status](https://travis-ci.org/yii2mod/yii2-cashier.svg?branch=master)](https://travis-ci.org/yii2mod/yii2-cashier)
 
 Installation
 ------------
