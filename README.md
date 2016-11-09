@@ -41,7 +41,7 @@ if ($this->db->driverName === 'mysql') {
     $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
 }
 
-$this->createTable('Subscription', [
+$this->createTable('subscription', [
     'id' => $this->primaryKey(),
     'userId' => $this->integer()->notNull(),
     'name' => $this->string()->notNull(),
@@ -54,10 +54,10 @@ $this->createTable('Subscription', [
     'updatedAt' => $this->timestamp()->null()
 ], $tableOptions);
 
-$this->addColumn('User', 'stripeId', $this->string());
-$this->addColumn('User', 'cardBrand', $this->string());
-$this->addColumn('User', 'cardLastFour', $this->string());
-$this->addColumn('User', 'trialEndAt', $this->timestamp()->null());
+$this->addColumn('user', 'stripeId', $this->string());
+$this->addColumn('user', 'cardBrand', $this->string());
+$this->addColumn('user', 'cardLastFour', $this->string());
+$this->addColumn('user', 'trialEndAt', $this->timestamp()->null());
 ```
 > Also you can apply migration by the following command:
 

@@ -15,7 +15,7 @@ class m160511_085953_init extends Migration
             $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('Subscription', [
+        $this->createTable('subscription', [
             'id' => $this->primaryKey(),
             'userId' => $this->integer()->notNull(),
             'name' => $this->string()->notNull(),
@@ -28,19 +28,20 @@ class m160511_085953_init extends Migration
             'updatedAt' => $this->timestamp()->null()
         ], $tableOptions);
 
-        $this->addColumn('User', 'stripeId', $this->string());
-        $this->addColumn('User', 'cardBrand', $this->string());
-        $this->addColumn('User', 'cardLastFour', $this->string());
-        $this->addColumn('User', 'trialEndAt', $this->timestamp()->null());
+        $this->addColumn('user', 'stripeId', $this->string());
+        $this->addColumn('user', 'cardBrand', $this->string());
+        $this->addColumn('user', 'cardLastFour', $this->string());
+        $this->addColumn('user', 'trialEndAt', $this->timestamp()->null());
     }
 
     public function down()
     {
-        $this->dropTable('Subscription');
-        $this->dropColumn('User', 'stripeId');
-        $this->dropColumn('User', 'cardBrand');
-        $this->dropColumn('User', 'cardLastFour');
-        $this->dropColumn('User', 'trialEndAt');
+        $this->dropTable('subscription');
+
+        $this->dropColumn('user', 'stripeId');
+        $this->dropColumn('user', 'cardBrand');
+        $this->dropColumn('user', 'cardLastFour');
+        $this->dropColumn('user', 'trialEndAt');
     }
 
     /*

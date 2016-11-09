@@ -47,7 +47,7 @@ class SubscriptionModel extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'Subscription';
+        return 'subscription';
     }
 
     /**
