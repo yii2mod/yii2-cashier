@@ -2,14 +2,15 @@
 
 namespace yii2mod\cashier;
 
-use DOMPDF;
 use Carbon\Carbon;
+use DOMPDF;
 use Stripe\Invoice as StripeInvoice;
 use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class Invoice
+ *
  * @package yii2mod\cashier
  */
 class Invoice
@@ -28,7 +29,6 @@ class Invoice
      */
     protected $invoice;
 
-
     /**
      * Create a new invoice instance.
      *
@@ -45,6 +45,7 @@ class Invoice
      * Get a Carbon date for the invoice.
      *
      * @param \DateTimeZone|string $timezone
+     *
      * @return \Carbon\Carbon
      */
     public function date($timezone = null)
@@ -201,6 +202,7 @@ class Invoice
      * Get all of the invoie items by a given type.
      *
      * @param  string $type
+     *
      * @return array
      */
     public function invoiceItemsByType($type)
@@ -222,6 +224,7 @@ class Invoice
      * Format the given amount into a string based on the user's preferences.
      *
      * @param int $amount
+     *
      * @return string
      */
     protected function formatAmount($amount)
@@ -233,6 +236,7 @@ class Invoice
      * Return invoice html
      *
      * @param array $data
+     *
      * @return string
      */
     public function renderInvoiceHtml(array $data)
@@ -248,6 +252,7 @@ class Invoice
      * Capture the invoice as a PDF and return the raw bytes.
      *
      * @param array $data
+     *
      * @return string
      */
     public function pdf(array $data)
@@ -260,7 +265,7 @@ class Invoice
             require_once $configPath;
         }
 
-        $dompdf = new DOMPDF;
+        $dompdf = new DOMPDF();
 
         $dompdf->load_html($this->renderInvoiceHtml($data));
 
@@ -273,7 +278,9 @@ class Invoice
      * Create an invoice download response.
      *
      * @param array $data
+     *
      * @return \yii\web\Response
+     *
      * @throws \yii\web\HttpException
      */
     public function download(array $data)
@@ -308,6 +315,7 @@ class Invoice
      * Dynamically get values from the Stripe invoice.
      *
      * @param string $key
+     *
      * @return mixed
      */
     public function __get($key)

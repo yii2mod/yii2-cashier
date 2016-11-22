@@ -1,8 +1,8 @@
 <?php
 
-use yii2mod\cashier\Cashier;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii2mod\cashier\Cashier;
 
 /* @var $user \yii\db\ActiveRecord */
 /* @var $invoice \yii2mod\cashier\Invoice */

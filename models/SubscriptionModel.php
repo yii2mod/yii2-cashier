@@ -13,17 +13,16 @@ use yii2mod\behaviors\CarbonBehavior;
 /**
  * This is the model class for table "Subscription".
  *
- * @property integer $id
- * @property integer $userId
+ * @property int $id
+ * @property int $userId
  * @property string $name
  * @property string $stripeId
  * @property string $stripePlan
- * @property integer $quantity
+ * @property int $quantity
  * @property Carbon $trialEndAt
  * @property Carbon $endAt
- * @property integer $createdAt
- * @property integer $updatedAt
- *
+ * @property int $createdAt
+ * @property int $updatedAt
  * @property \yii\db\ActiveRecord $user
  */
 class SubscriptionModel extends ActiveRecord
@@ -96,13 +95,13 @@ class SubscriptionModel extends ActiveRecord
                     $currentDateExpression = Yii::$app->db->getDriverName() === 'sqlite' ? "DATETIME('now')" : 'NOW()';
 
                     return new Expression($currentDateExpression);
-                }
+                },
             ],
             'carbon' => [
                 'class' => CarbonBehavior::className(),
                 'attributes' => [
                     'trialEndAt',
-                    'endAt'
+                    'endAt',
                 ],
             ],
         ];
@@ -110,6 +109,7 @@ class SubscriptionModel extends ActiveRecord
 
     /**
      * User relation
+     *
      * @return \yii\db\ActiveQuery
      */
     public function getUser()
@@ -161,7 +161,6 @@ class SubscriptionModel extends ActiveRecord
         }
     }
 
-
     /**
      * Determine if the subscription is within its grace period after cancellation.
      *
@@ -180,11 +179,13 @@ class SubscriptionModel extends ActiveRecord
      * Increment the quantity of the subscription.
      *
      * @param int $count
+     *
      * @return $this
      */
     public function incrementQuantity($count = 1)
     {
         $this->updateQuantity($this->quantity + $count);
+
         return $this;
     }
 
@@ -192,12 +193,14 @@ class SubscriptionModel extends ActiveRecord
      *  Increment the quantity of the subscription, and invoice immediately.
      *
      * @param int $count
+     *
      * @return $this
      */
     public function incrementAndInvoice($count = 1)
     {
         $this->incrementQuantity($count);
         $this->user->invoice();
+
         return $this;
     }
 
@@ -205,11 +208,13 @@ class SubscriptionModel extends ActiveRecord
      * Decrement the quantity of the subscription.
      *
      * @param int $count
+     *
      * @return $this
      */
     public function decrementQuantity($count = 1)
     {
         $this->updateQuantity(max(1, $this->quantity - $count));
+
         return $this;
     }
 
@@ -217,6 +222,7 @@ class SubscriptionModel extends ActiveRecord
      * Update the quantity of the subscription.
      *
      * @param int $quantity
+     *
      * @return $this
      */
     public function updateQuantity($quantity)
@@ -248,6 +254,7 @@ class SubscriptionModel extends ActiveRecord
      * Change the billing cycle anchor on a plan change.
      *
      * @param  int|string $date
+     *
      * @return $this
      */
     public function anchorBillingCycleOn($date = 'now')
@@ -265,6 +272,7 @@ class SubscriptionModel extends ActiveRecord
      * Swap the subscription to a new Stripe plan.
      *
      * @param  string $plan
+     *
      * @return $this
      */
     public function swap($plan)
@@ -351,8 +359,6 @@ class SubscriptionModel extends ActiveRecord
 
     /**
      * Mark the subscription as cancelled.
-     *
-     * @return void
      */
     public function markAsCancelled()
     {
@@ -397,7 +403,6 @@ class SubscriptionModel extends ActiveRecord
         return $this;
     }
 
-
     /**
      * Get the subscription as a Stripe subscription object.
      *
@@ -407,5 +412,4 @@ class SubscriptionModel extends ActiveRecord
     {
         return $this->user->asStripeCustomer()->subscriptions->retrieve($this->stripeId);
     }
-
 }

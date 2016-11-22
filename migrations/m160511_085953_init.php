@@ -25,7 +25,7 @@ class m160511_085953_init extends Migration
             'trialEndAt' => $this->timestamp()->null(),
             'endAt' => $this->timestamp()->null(),
             'createdAt' => $this->timestamp()->null(),
-            'updatedAt' => $this->timestamp()->null()
+            'updatedAt' => $this->timestamp()->null(),
         ], $tableOptions);
 
         $this->addColumn('user', 'stripeId', $this->string());

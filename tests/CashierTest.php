@@ -118,7 +118,7 @@ class CashierTest extends TestCase
 
     public function testGenericTrials()
     {
-        $user = new User;
+        $user = new User();
         $this->assertFalse($user->onGenericTrial());
         $user->trialEndAt = Carbon::tomorrow();
         $this->assertTrue($user->onGenericTrial());

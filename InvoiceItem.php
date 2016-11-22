@@ -1,10 +1,12 @@
 <?php
 
 namespace yii2mod\cashier;
+
 use Carbon\Carbon;
 
 /**
  * Class InvoiceItem
+ *
  * @package yii2mod\cashier
  */
 class InvoiceItem
@@ -107,6 +109,7 @@ class InvoiceItem
      * Format the given amount into a string based on the user's preferences.
      *
      * @param int $amount
+     *
      * @return string
      */
     protected function formatAmount($amount)
@@ -128,6 +131,7 @@ class InvoiceItem
      * Dynamically access the Stripe line item instance.
      *
      * @param string $key
+     *
      * @return mixed
      */
     public function __get($key)

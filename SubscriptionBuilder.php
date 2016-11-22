@@ -8,6 +8,7 @@ use yii2mod\cashier\models\SubscriptionModel;
 
 /**
  * Class SubscriptionBuilder
+ *
  * @package yii2mod\cashier
  */
 class SubscriptionBuilder
@@ -86,11 +87,13 @@ class SubscriptionBuilder
      * Specify the quantity of the subscription.
      *
      * @param int $quantity
+     *
      * @return $this
      */
     public function quantity($quantity)
     {
         $this->quantity = $quantity;
+
         return $this;
     }
 
@@ -98,11 +101,13 @@ class SubscriptionBuilder
      * Specify the ending date of the trial.
      *
      * @param int $trialDays
+     *
      * @return $this
      */
     public function trialDays($trialDays)
     {
         $this->trialDays = $trialDays;
+
         return $this;
     }
 
@@ -114,6 +119,7 @@ class SubscriptionBuilder
     public function skipTrial()
     {
         $this->skipTrial = true;
+
         return $this;
     }
 
@@ -121,11 +127,13 @@ class SubscriptionBuilder
      * The coupon to apply to a new subscription.
      *
      * @param string $coupon
+     *
      * @return $this
      */
     public function withCoupon($coupon)
     {
         $this->coupon = $coupon;
+
         return $this;
     }
 
@@ -133,11 +141,13 @@ class SubscriptionBuilder
      * The metadata to apply to a new subscription.
      *
      * @param array $metadata
+     *
      * @return $this
      */
     public function withMetadata($metadata)
     {
         $this->metadata = $metadata;
+
         return $this;
     }
 
@@ -145,6 +155,7 @@ class SubscriptionBuilder
      * Add a new Stripe subscription to the user.
      *
      * @param array $options
+     *
      * @return SubscriptionModel
      */
     public function add(array $options = [])
@@ -157,7 +168,9 @@ class SubscriptionBuilder
      *
      * @param string|null $token
      * @param array $options
+     *
      * @return SubscriptionModel
+     *
      * @throws Exception
      */
     public function create($token = null, array $options = [])
@@ -190,6 +203,7 @@ class SubscriptionBuilder
      *
      * @param string|null $token
      * @param array $options
+     *
      * @return \Stripe\Customer
      */
     protected function getStripeCustomer($token = null, array $options = [])
@@ -204,6 +218,7 @@ class SubscriptionBuilder
                 $this->user->updateCard($token);
             }
         }
+
         return $customer;
     }
 

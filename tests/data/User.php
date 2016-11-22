@@ -7,7 +7,7 @@ use yii\web\IdentityInterface;
 use yii2mod\cashier\Billable;
 
 /**
- * @property integer $id
+ * @property int $id
  * @property string $username
  * @property string $email
  */

@@ -12,6 +12,7 @@ sudo: false
 cache:
   directories:
     - $HOME/.composer/cache
+    - vendor
 
 install:
   - travis_retry composer self-update && composer --version
@@ -20,4 +21,5 @@ install:
   - travis_retry composer install --prefer-dist --no-interaction
 
 script:
+  - vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --dry-run --diff
   - phpunit --verbose $PHPUNIT_FLAGS

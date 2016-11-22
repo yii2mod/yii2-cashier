@@ -7,6 +7,7 @@ use yii\helpers\StringHelper;
 
 /**
  * Class Cashier
+ *
  * @package yii2mod\cashier
  */
 class Cashier
@@ -17,14 +18,14 @@ class Cashier
      * @var string
      */
     protected static $currency = 'usd';
-    
+
     /**
      * The current currency symbol.
      *
      * @var string
      */
     protected static $currencySymbol = '$';
-    
+
     /**
      * The custom currency formatter.
      *
@@ -37,7 +38,6 @@ class Cashier
      *
      * @param string $currency
      * @param string|null $symbol
-     * @return void
      */
     public static function useCurrency($currency, $symbol = null)
     {
@@ -49,7 +49,9 @@ class Cashier
      * Guess the currency symbol for the given currency.
      *
      * @param string $currency
+     *
      * @return string
+     *
      * @throws Exception
      */
     protected static function guessCurrencySymbol($currency)
@@ -64,7 +66,7 @@ class Cashier
             case 'gbp':
                 return '£';
             default:
-                throw new Exception("Unable to guess symbol for currency. Please explicitly specify it.");
+                throw new Exception('Unable to guess symbol for currency. Please explicitly specify it.');
         }
     }
 
@@ -82,7 +84,6 @@ class Cashier
      * Set the currency symbol to be used when formatting currency.
      *
      * @param string $symbol
-     * @return void
      */
     public static function useCurrencySymbol($symbol)
     {
@@ -103,7 +104,6 @@ class Cashier
      * Set the custom currency formatter.
      *
      * @param callable $callback
-     * @return void
      */
     public static function formatCurrencyUsing(callable $callback)
     {
@@ -114,6 +114,7 @@ class Cashier
      * Format the given amount into a displayable currency.
      *
      * @param int $amount
+     *
      * @return string
      */
     public static function formatAmount($amount)
@@ -125,7 +126,7 @@ class Cashier
         if (StringHelper::startsWith($amount, '-')) {
             return '-' . static::usesCurrencySymbol() . ltrim($amount, '-');
         }
+
         return static::usesCurrencySymbol() . $amount;
     }
-
 }

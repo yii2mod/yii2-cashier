@@ -2,7 +2,11 @@
     "name": "yii2mod/yii2-cashier",
     "description": "Yii2 Cashier provides an interface to Stripe's subscription billing services.",
     "type": "yii2-extension",
-    "keywords": ["yii2", "stripe", "billing"],
+    "keywords": [
+        "yii2",
+        "stripe",
+        "billing"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -16,6 +20,9 @@
         "stripe/stripe-php": "~3.0",
         "nesbot/carbon": "~1.0",
         "dompdf/dompdf": "^0.6.1"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "~1.7"
     },
     "autoload": {
         "psr-4": {

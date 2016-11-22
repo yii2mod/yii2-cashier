@@ -19,6 +19,7 @@ use yii2mod\cashier\models\SubscriptionModel;
 
 /**
  * Class Billable
+ *
  * @package yii2mod\cashier
  */
 trait Billable
@@ -35,6 +36,7 @@ trait Billable
      *
      * @param int $amount
      * @param array $options
+     *
      * @return \Stripe\Charge
      *
      * @throws \Stripe\Error\Card
@@ -63,11 +65,13 @@ trait Billable
      *
      * @param $charge
      * @param array $options
+     *
      * @return StripeRefund
      */
     public function refund($charge, array $options = [])
     {
         $options['charge'] = $charge;
+
         return StripeRefund::create($options, ['api_key' => $this->getStripeKey()]);
     }
 
@@ -87,6 +91,7 @@ trait Billable
      * @param string $description
      * @param int $amount
      * @param array $options
+     *
      * @return bool
      *
      * @throws \Stripe\Error\Card
@@ -116,6 +121,7 @@ trait Billable
      *
      * @param string $subscription
      * @param string $plan
+     *
      * @return SubscriptionBuilder
      */
     public function newSubscription($subscription, $plan)
@@ -128,6 +134,7 @@ trait Billable
      *
      * @param string $subscription
      * @param string|null $plan
+     *
      * @return bool
      */
     public function onTrial($subscription = 'default', $plan = null)
@@ -159,6 +166,7 @@ trait Billable
      *
      * @param string $subscription
      * @param string|null $plan
+     *
      * @return bool
      */
     public function subscribed($subscription = 'default', $plan = null)
@@ -170,6 +178,7 @@ trait Billable
         if (is_null($plan)) {
             return $subscription->valid();
         }
+
         return $subscription->valid() &&
         $subscription->stripePlan === $plan;
     }
@@ -178,6 +187,7 @@ trait Billable
      * Get a subscription instance by name.
      *
      * @param string $subscription
+     *
      * @return SubscriptionModel|null
      */
     public function subscription($subscription = 'default')
@@ -225,7 +235,6 @@ trait Billable
 
             return new Invoice($this, $stripeInvoice);
         } catch (InvalidRequest $e) {
-            //
         }
     }
 
@@ -233,6 +242,7 @@ trait Billable
      * Find an invoice by ID.
      *
      * @param string $id
+     *
      * @return Invoice|null
      */
     public function findInvoice($id)
@@ -240,7 +250,6 @@ trait Billable
         try {
             return new Invoice($this, StripeInvoice::retrieve($id, $this->getStripeKey()));
         } catch (Exception $e) {
-
         }
     }
 
@@ -248,7 +257,9 @@ trait Billable
      * Find an invoice or throw a 404 error.
      *
      * @param string $id
+     *
      * @return Invoice
+     *
      * @throws NotFoundHttpException
      */
     public function findInvoiceOrFail($id)
@@ -267,6 +278,7 @@ trait Billable
      *
      * @param string $id
      * @param array $data
+     *
      * @return Response
      */
     public function downloadInvoice($id, array $data)
@@ -279,6 +291,7 @@ trait Billable
      *
      * @param bool $includePending
      * @param array $parameters
+     *
      * @return array
      */
     public function invoices($includePending = false, $parameters = [])
@@ -307,6 +320,7 @@ trait Billable
      * Get an array of the entity's invoices.
      *
      * @param array $parameters
+     *
      * @return array
      */
     public function invoicesIncludingPending(array $parameters = [])
@@ -318,7 +332,6 @@ trait Billable
      * Update customer's credit card.
      *
      * @param string $token
-     * @return void
      */
     public function updateCard($token)
     {
@@ -367,6 +380,7 @@ trait Billable
             $this->cardLastFour = null;
             $this->update(false);
         }
+
         return $this;
     }
 
@@ -374,6 +388,7 @@ trait Billable
      * Fills the user's properties with the source from Stripe.
      *
      * @param \Stripe\Card|null $card
+     *
      * @return $this
      */
     protected function fillCardDetails($card)
@@ -382,6 +397,7 @@ trait Billable
             $this->cardBrand = $card->brand;
             $this->cardLastFour = $card->last4;
         }
+
         return $this;
     }
 
@@ -389,7 +405,6 @@ trait Billable
      * Apply a coupon to the billable entity.
      *
      * @param string $coupon
-     * @return void
      */
     public function applyCoupon($coupon)
     {
@@ -405,6 +420,7 @@ trait Billable
      *
      * @param array|string $plans
      * @param string $subscription
+     *
      * @return bool
      */
     public function subscribedToPlan($plans, $subscription = 'default')
@@ -428,6 +444,7 @@ trait Billable
      * Determine if the entity is on the given plan.
      *
      * @param string $plan
+     *
      * @return bool
      */
     public function onPlan($plan)
@@ -452,6 +469,7 @@ trait Billable
      *
      * @param string $token
      * @param array $options
+     *
      * @return Customer
      */
     public function createAsStripeCustomer($token, array $options = [])
@@ -522,7 +540,6 @@ trait Billable
      * Set the Stripe API key.
      *
      * @param  string $key
-     * @return void
      */
     public static function setStripeKey($key)
     {

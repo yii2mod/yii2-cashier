@@ -2,23 +2,24 @@
 
 namespace yii2mod\cashier\controllers;
 
-use yii2mod\cashier\models\SubscriptionModel;
 use Exception;
+use Stripe\Event as StripeEvent;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\Inflector;
 use yii\web\Controller;
-use Stripe\Event as StripeEvent;
 use yii\web\Response;
+use yii2mod\cashier\models\SubscriptionModel;
 
 /**
  * Class WebhookController
+ *
  * @package yii2mod\cashier\controllers
  */
 class WebhookController extends Controller
 {
     /**
-     * @var bool whether to enable CSRF validation for the actions in this controller.
+     * @var bool whether to enable CSRF validation for the actions in this controller
      */
     public $enableCsrfValidation = false;
 
@@ -32,8 +33,8 @@ class WebhookController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'handle-webhook' => ['post'],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -60,6 +61,7 @@ class WebhookController extends Controller
      * Handle a cancelled customer from a Stripe subscription.
      *
      * @param array $payload
+     *
      * @return Response
      */
     protected function handleCustomerSubscriptionDeleted(array $payload)
@@ -77,7 +79,7 @@ class WebhookController extends Controller
 
         return new Response([
             'statusCode' => 200,
-            'statusText' => 'Webhook Handled'
+            'statusText' => 'Webhook Handled',
         ]);
     }
 
@@ -85,6 +87,7 @@ class WebhookController extends Controller
      * Get the billable entity instance by Stripe ID.
      *
      * @param string $stripeId
+     *
      * @return null|static
      */
     protected function getUserByStripeId($stripeId)
@@ -98,6 +101,7 @@ class WebhookController extends Controller
      * Verify with Stripe that the event is genuine.
      *
      * @param string $id
+     *
      * @return bool
      */
     protected function eventExistsOnStripe($id)
@@ -117,7 +121,7 @@ class WebhookController extends Controller
     public function missingMethod()
     {
         return new Response([
-            'statusCode' => 200
+            'statusCode' => 200,
         ]);
     }
 }
