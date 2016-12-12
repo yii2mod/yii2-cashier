@@ -22,7 +22,7 @@
         "dompdf/dompdf": "^0.6.1"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "~1.7"
+        "friendsofphp/php-cs-fixer": "~2.0"
     },
     "autoload": {
         "psr-4": {
