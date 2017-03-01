@@ -17,7 +17,7 @@
     "require": {
         "yiisoft/yii2": ">=2.0.8",
         "yii2mod/yii2-behaviors": "*",
-        "stripe/stripe-php": "~3.0",
+        "stripe/stripe-php": "~4.0",
         "nesbot/carbon": "~1.0",
         "dompdf/dompdf": "^0.8.0"
     },
