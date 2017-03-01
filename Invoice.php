@@ -3,7 +3,7 @@
 namespace yii2mod\cashier;
 
 use Carbon\Carbon;
-use DOMPDF;
+use Dompdf\Dompdf;
 use Stripe\Invoice as StripeInvoice;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -115,7 +115,7 @@ class Invoice
     public function hasDiscount()
     {
         return $this->invoice->subtotal > 0 && $this->invoice->subtotal != $this->invoice->total
-        && !is_null($this->invoice->discount);
+            && !is_null($this->invoice->discount);
     }
 
     /**
@@ -265,7 +265,7 @@ class Invoice
             require_once $configPath;
         }
 
-        $dompdf = new DOMPDF();
+        $dompdf = new Dompdf();
 
         $dompdf->load_html($this->renderInvoiceHtml($data));
 
