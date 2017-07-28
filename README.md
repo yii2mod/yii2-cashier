@@ -94,7 +94,7 @@ Next, you should configure your params section in your configuration file:
 Subscriptions
 -------------
 
-####Creating Subscriptions
+#### Creating Subscriptions
 
 To create a subscription, first retrieve an instance of your billable model, which typically will be an instance of models\User. Once you have retrieved the model instance, you may use the newSubscription method to create the model's subscription:
 
@@ -131,7 +131,7 @@ $user->newSubscription('main', 'monthly')
      ->create($creditCardToken);
 ```
 
-####Checking Subscription Status
+#### Checking Subscription Status
 
 Once a user is subscribed to your application, you may easily check their subscription status using a variety of convenient methods. First, the subscribed method returns true if the user has an active subscription, even if the subscription is currently within its trial period:
 
@@ -175,7 +175,7 @@ if ($user->subscription('main')->onGracePeriod()) {
 }
 ```
 
-####Changing Plans
+#### Changing Plans
 
 After a user is subscribed to your application, they may occasionally want to change to a new subscription plan. To swap a user to a new subscription, use the swap method. For example, we may easily switch a user to the premium subscription:
 
@@ -199,7 +199,7 @@ $user->subscription('main')
         ->swap('provider-plan-id');
 ```
 
-####Subscription Quantity
+#### Subscription Quantity
 
 Sometimes subscriptions are affected by "quantity". For example, your application might charge $10 per month per user on an account. To easily increment or decrement your subscription quantity, use the incrementQuantity and decrementQuantity methods:
 ```php
@@ -223,7 +223,7 @@ $user->subscription('main')->updateQuantity(10);
 
 For more information on subscription quantities, consult the [Stripe documentation](https://stripe.com/docs/subscriptions/guide#setting-quantities).
 
-####Subscription Taxes
+#### Subscription Taxes
 
 With Cashier, it's easy to provide the tax_percent value sent to Stripe. To specify the tax percentage a user pays on a subscription, implement the taxPercentage method on your billable model, and return a numeric value between 0 and 100, with no more than 2 decimal places.
 
@@ -236,7 +236,7 @@ public function taxPercentage() {
 This enables you to apply a tax rate on a model-by-model basis, which may be helpful for a user base that spans multiple countries.
 
 
-####Cancelling Subscriptions
+#### Cancelling Subscriptions
 
 To cancel a subscription, simply call the cancel method on the user's subscription:
 
@@ -255,7 +255,7 @@ if ($user->subscription('main')->onGracePeriod()) {
 ```
 
 
-####Resuming Subscriptions
+#### Resuming Subscriptions
 
 If a user has cancelled their subscription and you wish to resume it, use the resume method. The user must still be on their grace period in order to resume a subscription:
 
@@ -268,7 +268,7 @@ If the user cancels a subscription and then resumes that subscription before the
 Subscription Trials
 -------------------
 
-####With Credit Card Up Front
+#### With Credit Card Up Front
 
 If you would like to offer trial periods to your customers while still collecting payment method information up front, You should use the trialDays method when creating your subscriptions:
 
@@ -295,7 +295,7 @@ if ($user->subscription('main')->onTrial()) {
 }
 ```
 
-####Without Credit Card Up Front
+#### Without Credit Card Up Front
 
 If you would like to offer trial periods without collecting the user's payment method information up front, you may simply set the trialEndAt column on the user record to your desired trial ending date. For example, this is typically done during user registration:
 
@@ -333,7 +333,7 @@ $user->newSubscription('main', 'monthly')->create($creditCardToken);
 Handling Stripe Webhooks
 ------------------------
 
-####Failed Subscriptions
+#### Failed Subscriptions
 
 Just add the WebhookController to the ```controllerMap``` in your configuration file
 
@@ -351,7 +351,7 @@ Don't forget: you will need to configure the webhook URI, for example: ```yoursi
 Single Charges
 --------------
 
-####Simple Charge
+#### Simple Charge
 
 > When using Stripe, the charge method accepts the amount you would like to charge in the lowest denominator of the currency used by your application.
 
@@ -380,7 +380,7 @@ try {
 }
 ```
 
-####Charge With Invoice
+#### Charge With Invoice
 
 Sometimes you may need to make a one-time charge but also generate an invoice for the charge so that you may offer a PDF receipt to your customer. The invoiceFor method lets you do just that. For example, let's invoice the customer $5.00 for a "One Time Fee":
 
