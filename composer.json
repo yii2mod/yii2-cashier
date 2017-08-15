@@ -28,5 +28,11 @@
         "psr-4": {
             "yii2mod\\cashier\\": ""
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ]
 }
