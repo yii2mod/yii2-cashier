@@ -1,7 +1,12 @@
-Yii2 Cashier
-===============================================
+<p align="center">
+    <a href="https://github.com/yiisoft" target="_blank">
+        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
+    </a>
+    <h1 align="center">Cashier Extension for Yii 2</h1>
+    <br>
+</p>
 
-This extension is the port of [Laravel's Cashier package](https://laravel.com/docs/5.2/billing)
+This extension is the port of [Laravel's Cashier package](https://laravel.com/docs/5.4/billing)
 
 [![Latest Stable Version](https://poser.pugx.org/yii2mod/yii2-cashier/v/stable)](https://packagist.org/packages/yii2mod/yii2-cashier) [![Total Downloads](https://poser.pugx.org/yii2mod/yii2-cashier/downloads)](https://packagist.org/packages/yii2mod/yii2-cashier) [![License](https://poser.pugx.org/yii2mod/yii2-cashier/license)](https://packagist.org/packages/yii2mod/yii2-cashier)
 [![Build Status](https://travis-ci.org/yii2mod/yii2-cashier.svg?branch=master)](https://travis-ci.org/yii2mod/yii2-cashier)
