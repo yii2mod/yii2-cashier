@@ -1,6 +1,6 @@
 <?php
 
-namespace yii2mod\cashier;
+namespace bigdropinc\cashier;
 
 use Carbon\Carbon;
 use Exception;
@@ -15,12 +15,12 @@ use Stripe\Token;
 use Yii;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use yii2mod\cashier\models\SubscriptionModel;
+use bigdropinc\cashier\models\SubscriptionModel;
 
 /**
  * Class Billable
  *
- * @package yii2mod\cashier
+ * @package bigdropinc\cashier
  */
 trait Billable
 {
@@ -49,8 +49,8 @@ trait Billable
 
         $options['amount'] = $amount;
 
-        if (!array_key_exists('source', $options) && $this->stripeId) {
-            $options['customer'] = $this->stripeId;
+        if (!array_key_exists('source', $options) && $this->stripe_id) {
+            $options['customer'] = $this->stripe_id;
         }
 
         if (!array_key_exists('source', $options) && !array_key_exists('customer', $options)) {
@@ -82,7 +82,7 @@ trait Billable
      */
     public function hasCardOnFile()
     {
-        return (bool)$this->cardBrand;
+        return (bool)$this->card_brand;
     }
 
     /**
@@ -98,12 +98,12 @@ trait Billable
      */
     public function invoiceFor($description, $amount, array $options = [])
     {
-        if (!$this->stripeId) {
+        if (!$this->stripe_id) {
             throw new InvalidArgumentException('User is not a customer. See the createAsStripeCustomer method.');
         }
 
         $options = array_merge([
-            'customer' => $this->stripeId,
+            'customer' => $this->stripe_id,
             'amount' => $amount,
             'currency' => $this->preferredCurrency(),
             'description' => $description,
@@ -148,7 +148,7 @@ trait Billable
         }
 
         return $subscription && $subscription->onTrial() &&
-        $subscription->stripePlan === $plan;
+        $subscription->stripe_plan === $plan;
     }
 
     /**
@@ -158,7 +158,7 @@ trait Billable
      */
     public function onGenericTrial()
     {
-        return $this->trialEndAt && Carbon::now()->lt(Carbon::createFromFormat('Y-m-d H:i:s', $this->trialEndAt));
+        return $this->trial_end_at && Carbon::now()->lt(Carbon::createFromFormat('Y-m-d H:i:s', $this->trial_end_at));
     }
 
     /**
@@ -180,7 +180,7 @@ trait Billable
         }
 
         return $subscription->valid() &&
-        $subscription->stripePlan === $plan;
+        $subscription->stripe_plan === $plan;
     }
 
     /**
@@ -200,7 +200,7 @@ trait Billable
      */
     public function getSubscriptions()
     {
-        return $this->hasMany(SubscriptionModel::className(), ['userId' => 'id'])->orderBy(['createdAt' => SORT_DESC]);
+        return $this->hasMany(SubscriptionModel::className(), ['user_id' => 'id'])->orderBy(['created_at' => SORT_DESC]);
     }
 
     /**
@@ -210,9 +210,9 @@ trait Billable
      */
     public function invoice()
     {
-        if ($this->stripeId) {
+        if ($this->stripe_id) {
             try {
-                return StripeInvoice::create(['customer' => $this->stripeId], $this->getStripeKey())->pay();
+                return StripeInvoice::create(['customer' => $this->stripe_id], $this->getStripeKey())->pay();
             } catch (InvalidRequest $e) {
                 return false;
             }
@@ -230,7 +230,7 @@ trait Billable
     {
         try {
             $stripeInvoice = StripeInvoice::upcoming(
-                ['customer' => $this->stripeId], ['api_key' => $this->getStripeKey()]
+                ['customer' => $this->stripe_id], ['api_key' => $this->getStripeKey()]
             );
 
             return new Invoice($this, $stripeInvoice);
@@ -432,7 +432,7 @@ trait Billable
         }
 
         foreach ((array)$plans as $plan) {
-            if ($subscription->stripePlan === $plan) {
+            if ($subscription->stripe_plan === $plan) {
                 return true;
             }
         }
@@ -449,7 +449,7 @@ trait Billable
      */
     public function onPlan($plan)
     {
-        $plan = $this->getSubscriptions()->where(['stripePlan' => $plan])->one();
+        $plan = $this->getSubscriptions()->where(['stripe_plan' => $plan])->one();
 
         return !is_null($plan) && $plan->valid();
     }
@@ -461,7 +461,7 @@ trait Billable
      */
     public function hasStripeId()
     {
-        return !is_null($this->stripeId);
+        return !is_null($this->stripe_id);
     }
 
     /**
@@ -482,7 +482,7 @@ trait Billable
         // and allow us to retrieve users from Stripe later when we need to work.
         $customer = Customer::create($options, $this->getStripeKey());
 
-        $this->stripeId = $customer->id;
+        $this->stripe_id = $customer->id;
 
         $this->save();
 
@@ -503,7 +503,7 @@ trait Billable
      */
     public function asStripeCustomer()
     {
-        return Customer::retrieve($this->stripeId, $this->getStripeKey());
+        return Customer::retrieve($this->stripe_id, $this->getStripeKey());
     }
 
     /**

@@ -1,13 +1,13 @@
 <?php
 
-namespace yii2mod\cashier;
+namespace bigdropinc\cashier;
 
 use Carbon\Carbon;
 
 /**
  * Class InvoiceItem
  *
- * @package yii2mod\cashier
+ * @package bigdropinc\cashier
  */
 class InvoiceItem
 {

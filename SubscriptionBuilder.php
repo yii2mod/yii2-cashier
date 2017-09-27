@@ -1,15 +1,15 @@
 <?php
 
-namespace yii2mod\cashier;
+namespace bigdropinc\cashier;
 
 use Carbon\Carbon;
 use yii\base\Exception;
-use yii2mod\cashier\models\SubscriptionModel;
+use bigdropinc\cashier\models\SubscriptionModel;
 
 /**
  * Class SubscriptionBuilder
  *
- * @package yii2mod\cashier
+ * @package bigdropinc\cashier
  */
 class SubscriptionBuilder
 {
@@ -183,13 +183,13 @@ class SubscriptionBuilder
             $trialEndsAt = $this->trialDays ? Carbon::now()->addDays($this->trialDays) : null;
         }
         $subscriptionModel = new SubscriptionModel([
-            'userId' => $this->user->id,
+            'user_id' => $this->user->id,
             'name' => $this->name,
-            'stripeId' => $subscription->id,
-            'stripePlan' => $this->plan,
+            'stripe_id' => $subscription->id,
+            'stripe_plan' => $this->plan,
             'quantity' => $this->quantity,
-            'trialEndAt' => $trialEndsAt,
-            'endAt' => null,
+            'trial_end_at' => $trialEndsAt,
+            'end_at' => null,
         ]);
         if ($subscriptionModel->save()) {
             return $subscriptionModel;

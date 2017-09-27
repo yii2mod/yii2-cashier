@@ -1,6 +1,6 @@
 <?php
 
-namespace yii2mod\cashier\controllers;
+namespace bigdropinc\cashier\controllers;
 
 use Exception;
 use Stripe\Event as StripeEvent;
@@ -9,12 +9,12 @@ use yii\filters\VerbFilter;
 use yii\helpers\Inflector;
 use yii\web\Controller;
 use yii\web\Response;
-use yii2mod\cashier\models\SubscriptionModel;
+use bigdropinc\cashier\models\SubscriptionModel;
 
 /**
  * Class WebhookController
  *
- * @package yii2mod\cashier\controllers
+ * @package bigdropinc\cashier\controllers
  */
 class WebhookController extends Controller
 {
@@ -71,7 +71,7 @@ class WebhookController extends Controller
             $subscriptions = $user->getSubscriptions()->all();
             /* @var $subscription SubscriptionModel */
             foreach ($subscriptions as $subscription) {
-                if ($subscription->stripeId === $payload['data']['object']['id']) {
+                if ($subscription->stripe_id === $payload['data']['object']['id']) {
                     $subscription->markAsCancelled();
                 }
             }
@@ -94,7 +94,7 @@ class WebhookController extends Controller
     {
         $model = Yii::$app->user->identityClass;
 
-        return $model::findOne(['stripeId' => $stripeId]);
+        return $model::findOne(['stripe_id' => $stripeId]);
     }
 
     /**

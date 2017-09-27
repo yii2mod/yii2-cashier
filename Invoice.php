@@ -1,6 +1,6 @@
 <?php
 
-namespace yii2mod\cashier;
+namespace bigdropinc\cashier;
 
 use Carbon\Carbon;
 use Dompdf\Dompdf;
@@ -11,7 +11,7 @@ use yii\helpers\ArrayHelper;
 /**
  * Class Invoice
  *
- * @package yii2mod\cashier
+ * @package bigdropinc\cashier
  */
 class Invoice
 {
@@ -241,7 +241,7 @@ class Invoice
      */
     public function renderInvoiceHtml(array $data)
     {
-        $viewPath = ArrayHelper::getValue($data, 'invoiceView', '@vendor/yii2mod/yii2-cashier/views/invoice');
+        $viewPath = ArrayHelper::getValue($data, 'invoiceView', '@vendor/bigdropinc/yii2-cashier/views/invoice');
 
         return Yii::$app->controller->renderPartial($viewPath, array_merge(
             $data, ['invoice' => $this, 'user' => $this->user]

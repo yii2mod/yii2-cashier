@@ -1,10 +1,10 @@
 <?php
 
-namespace yii2mod\cashier\tests\data;
+namespace bigdropinc\cashier\tests\data;
 
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
-use yii2mod\cashier\Billable;
+use bigdropinc\cashier\Billable;
 
 /**
  * @property int $id
