@@ -9,7 +9,6 @@
 This extension is the port of [Laravel's Cashier package](https://laravel.com/docs/5.4/billing)
 
 [![Latest Stable Version](https://poser.pugx.org/bigdropinc/yii2-cashier/v/stable)](https://packagist.org/packages/bigdropinc/yii2-cashier) [![Total Downloads](https://poser.pugx.org/bigdropinc/yii2-cashier/downloads)](https://packagist.org/packages/bigdropinc/yii2-cashier) [![License](https://poser.pugx.org/bigdropinc/yii2-cashier/license)](https://packagist.org/packages/bigdropinc/yii2-cashier)
-[![Build Status](https://travis-ci.org/bigdropinc/yii2-cashier.svg?branch=master)](https://travis-ci.org/bigdropinc/yii2-cashier)
 
 Installation
 ------------
