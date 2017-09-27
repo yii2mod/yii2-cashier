@@ -1,6 +1,6 @@
 <?php
 
-namespace yii2mod\cashier;
+namespace bigdropinc\cashier;
 
 use yii\base\Exception;
 use yii\helpers\StringHelper;
@@ -8,7 +8,7 @@ use yii\helpers\StringHelper;
 /**
  * Class Cashier
  *
- * @package yii2mod\cashier
+ * @package bigdropinc\cashier
  */
 class Cashier
 {

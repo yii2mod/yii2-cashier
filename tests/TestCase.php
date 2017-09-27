@@ -1,6 +1,6 @@
 <?php
 
-namespace yii2mod\cashier\tests;
+namespace bigdropinc\cashier\tests;
 
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -37,7 +37,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'basePath' => __DIR__,
             'vendorPath' => $this->getVendorPath(),
             'controllerMap' => [
-                'webhook' => 'yii2mod\cashier\controllers\WebhookController',
+                'webhook' => 'bigdropinc\cashier\controllers\WebhookController',
             ],
             'components' => [
                 'db' => [
@@ -49,7 +49,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
                     'scriptUrl' => '/index.php',
                 ],
                 'user' => [
-                    'identityClass' => 'yii2mod\cashier\tests\data\User',
+                    'identityClass' => 'bigdropinc\cashier\tests\data\User',
                 ],
             ],
             'params' => [
@@ -87,25 +87,25 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
         $db->createCommand()->createTable('subscription', [
             'id' => 'pk',
-            'userId' => 'integer not null',
+            'user_id' => 'integer not null',
             'name' => 'string not null',
-            'stripeId' => 'string not null',
-            'stripePlan' => 'string not null',
+            'stripe_id' => 'string not null',
+            'stripe_plan' => 'string not null',
             'quantity' => 'integer not null',
-            'trialEndAt' => 'timestamp null default null',
-            'endAt' => 'timestamp null default null',
-            'createdAt' => 'timestamp null default null',
-            'updatedAt' => 'timestamp null default null',
+            'trial_end_at' => 'timestamp null default null',
+            'end_at' => 'timestamp null default null',
+            'created_at' => 'dateTime null default null',
+            'updated_at' => 'dateTime null default null',
         ])->execute();
 
         $db->createCommand()->createTable('user', [
             'id' => 'pk',
             'username' => 'string',
             'email' => 'string',
-            'stripeId' => 'string',
-            'cardBrand' => 'string',
+            'stripe_id' => 'string',
+            'card_brand' => 'string',
             'cardLastFour' => 'string',
-            'trialEndAt' => 'timestamp null default null',
+            'trial_end_at' => 'timestamp null default null',
         ])->execute();
 
         $db->createCommand()->insert('user', [

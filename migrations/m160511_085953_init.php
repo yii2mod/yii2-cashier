@@ -17,41 +17,30 @@ class m160511_085953_init extends Migration
 
         $this->createTable('{{%subscription}}', [
             'id' => $this->primaryKey(),
-            'userId' => $this->integer()->notNull(),
+            'user_id' => $this->integer()->notNull(),
             'name' => $this->string()->notNull(),
-            'stripeId' => $this->string()->notNull(),
-            'stripePlan' => $this->string()->notNull(),
+            'stripe_id' => $this->string()->notNull(),
+            'stripe_plan' => $this->string()->notNull(),
             'quantity' => $this->integer()->notNull(),
-            'trialEndAt' => $this->timestamp()->null(),
-            'endAt' => $this->timestamp()->null(),
-            'createdAt' => $this->timestamp()->null(),
-            'updatedAt' => $this->timestamp()->null(),
+            'trial_end_at' => $this->timestamp()->null(),
+            'end_at' => $this->timestamp()->null(),
+            'created_at' => $this->dateTime()->null(),
+            'updated_at' => $this->dateTime()->null(),
         ], $tableOptions);
 
-        $this->addColumn('{{%user}}', 'stripeId', $this->string());
-        $this->addColumn('{{%user}}', 'cardBrand', $this->string());
-        $this->addColumn('{{%user}}', 'cardLastFour', $this->string());
-        $this->addColumn('{{%user}}', 'trialEndAt', $this->timestamp()->null());
+        $this->addColumn('{{%user}}', 'stripe_id', $this->string());
+        $this->addColumn('{{%user}}', 'card_brand', $this->string());
+        $this->addColumn('{{%user}}', 'card_last_four', $this->string());
+        $this->addColumn('{{%user}}', 'trial_end_at', $this->timestamp()->null());
     }
 
     public function down()
     {
         $this->dropTable('{{%subscription}}');
 
-        $this->dropColumn('{{%user}}', 'stripeId');
-        $this->dropColumn('{{%user}}', 'cardBrand');
-        $this->dropColumn('{{%user}}', 'cardLastFour');
-        $this->dropColumn('{{%user}}', 'trialEndAt');
+        $this->dropColumn('{{%user}}', 'stripe_id');
+        $this->dropColumn('{{%user}}', 'card_brand');
+        $this->dropColumn('{{%user}}', 'card_last_four');
+        $this->dropColumn('{{%user}}', 'trial_end_at');
     }
-
-    /*
-    // Use safeUp/safeDown to run migration code within a transaction
-    public function safeUp()
-    {
-    }
-
-    public function safeDown()
-    {
-    }
-    */
 }

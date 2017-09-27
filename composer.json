@@ -1,5 +1,5 @@
 {
-    "name": "yii2mod/yii2-cashier",
+    "name": "bigdropinc/yii2-cashier",
     "description": "Yii2 Cashier provides an interface to Stripe's subscription billing services.",
     "type": "yii2-extension",
     "keywords": [
@@ -26,7 +26,7 @@
     },
     "autoload": {
         "psr-4": {
-            "yii2mod\\cashier\\": ""
+            "bigdropinc\\cashier\\": ""
         }
     },
     "repositories": [

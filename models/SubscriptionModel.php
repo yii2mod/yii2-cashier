@@ -1,6 +1,6 @@
 <?php
 
-namespace yii2mod\cashier\models;
+namespace bigdropinc\cashier\models;
 
 use Carbon\Carbon;
 use DateTimeInterface;
@@ -14,15 +14,15 @@ use yii2mod\behaviors\CarbonBehavior;
  * This is the model class for table "Subscription".
  *
  * @property int $id
- * @property int $userId
+ * @property int $user_id
  * @property string $name
- * @property string $stripeId
- * @property string $stripePlan
+ * @property string $stripe_id
+ * @property string $stripe_plan
  * @property int $quantity
- * @property Carbon $trialEndAt
- * @property Carbon $endAt
- * @property int $createdAt
- * @property int $updatedAt
+ * @property Carbon $trial_end_at
+ * @property Carbon $end_at
+ * @property int $created_at
+ * @property int $updated_at
  * @property \yii\db\ActiveRecord $user
  */
 class SubscriptionModel extends ActiveRecord
@@ -55,10 +55,10 @@ class SubscriptionModel extends ActiveRecord
     public function rules()
     {
         return [
-            [['userId', 'name', 'stripeId', 'stripePlan', 'quantity'], 'required'],
-            [['userId', 'quantity'], 'integer'],
-            [['trialEndAt', 'endAt'], 'safe'],
-            [['name', 'stripeId', 'stripePlan'], 'string', 'max' => 255],
+            [['user_id', 'name', 'stripe_id', 'stripe_plan', 'quantity'], 'required'],
+            [['user_id', 'quantity'], 'integer'],
+            [['trial_end_at', 'end_at'], 'safe'],
+            [['name', 'stripe_id', 'stripe_plan'], 'string', 'max' => 255],
         ];
     }
 
@@ -69,15 +69,15 @@ class SubscriptionModel extends ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
-            'userId' => Yii::t('app', 'User ID'),
+            'user_id' => Yii::t('app', 'User ID'),
             'name' => Yii::t('app', 'Name'),
-            'stripeId' => Yii::t('app', 'Stripe ID'),
-            'stripePlan' => Yii::t('app', 'Stripe Plan'),
+            'stripe_id' => Yii::t('app', 'Stripe ID'),
+            'stripe_plan' => Yii::t('app', 'Stripe Plan'),
             'quantity' => Yii::t('app', 'Quantity'),
-            'trialEndAt' => Yii::t('app', 'Trial End At'),
-            'endAt' => Yii::t('app', 'End At'),
-            'createdAt' => Yii::t('app', 'Created At'),
-            'updatedAt' => Yii::t('app', 'Updated At'),
+            'trial_end_at' => Yii::t('app', 'Trial End At'),
+            'end_at' => Yii::t('app', 'End At'),
+            'created_at' => Yii::t('app', 'Created At'),
+            'updated_at' => Yii::t('app', 'Updated At'),
         ];
     }
 
@@ -89,19 +89,18 @@ class SubscriptionModel extends ActiveRecord
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
-                'createdAtAttribute' => 'createdAt',
-                'updatedAtAttribute' => 'updatedAt',
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
                 'value' => function () {
-                    $currentDateExpression = Yii::$app->db->getDriverName() === 'sqlite' ? "DATETIME('now')" : 'NOW()';
-
-                    return new Expression($currentDateExpression);
+                    $date = new \DateTime('now', new \DateTimeZone('UTC'));
+                    return $date->format('Y-m-d H:i:s');
                 },
             ],
             'carbon' => [
                 'class' => CarbonBehavior::className(),
                 'attributes' => [
-                    'trialEndAt',
-                    'endAt',
+                    'trial_end_at',
+                    'end_at',
                 ],
             ],
         ];
@@ -114,7 +113,7 @@ class SubscriptionModel extends ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(Yii::$app->user->identityClass, ['id' => 'userId']);
+        return $this->hasOne(Yii::$app->user->identityClass, ['id' => 'user_id']);
     }
 
     /**
@@ -134,7 +133,7 @@ class SubscriptionModel extends ActiveRecord
      */
     public function active()
     {
-        return is_null($this->endAt) || $this->onGracePeriod();
+        return is_null($this->end_at) || $this->onGracePeriod();
     }
 
     /**
@@ -144,7 +143,7 @@ class SubscriptionModel extends ActiveRecord
      */
     public function cancelled()
     {
-        return !is_null($this->endAt);
+        return !is_null($this->end_at);
     }
 
     /**
@@ -154,8 +153,8 @@ class SubscriptionModel extends ActiveRecord
      */
     public function onTrial()
     {
-        if (!is_null($this->trialEndAt)) {
-            return Carbon::today()->lt($this->trialEndAt);
+        if (!is_null($this->trial_end_at)) {
+            return Carbon::today()->lt($this->trial_end_at);
         } else {
             return false;
         }
@@ -168,7 +167,7 @@ class SubscriptionModel extends ActiveRecord
      */
     public function onGracePeriod()
     {
-        if (!is_null($endAt = $this->endAt)) {
+        if (!is_null($endAt = $this->end_at)) {
             return Carbon::now()->lt(Carbon::instance($endAt));
         } else {
             return false;
@@ -291,7 +290,7 @@ class SubscriptionModel extends ActiveRecord
         // to maintain the current trial state, whether that is "active" or to run
         // the swap out with the exact number of days left on this current plan.
         if ($this->onTrial()) {
-            $subscription->trial_end = $this->trialEndAt->getTimestamp();
+            $subscription->trial_end = $this->trial_end_at->getTimestamp();
         } else {
             $subscription->trial_end = 'now';
         }
@@ -307,8 +306,8 @@ class SubscriptionModel extends ActiveRecord
 
         $this->user->invoice();
 
-        $this->stripePlan = $plan;
-        $this->endAt = null;
+        $this->stripe_plan = $plan;
+        $this->end_at = null;
         $this->save();
 
         return $this;
@@ -329,9 +328,9 @@ class SubscriptionModel extends ActiveRecord
         // would have ended. Otherwise, we'll retrieve the end of the billing period
         // period and make that the end of the grace period for this current user.
         if ($this->onTrial()) {
-            $this->endAt = $this->trialEndAt;
+            $this->end_at = $this->trial_end_at;
         } else {
-            $this->endAt = Carbon::createFromTimestamp(
+            $this->end_at = Carbon::createFromTimestamp(
                 $subscription->current_period_end
             );
         }
@@ -362,7 +361,7 @@ class SubscriptionModel extends ActiveRecord
      */
     public function markAsCancelled()
     {
-        $this->endAt = Carbon::now();
+        $this->end_at = Carbon::now();
         $this->save();
     }
 
@@ -384,10 +383,10 @@ class SubscriptionModel extends ActiveRecord
         // To resume the subscription we need to set the plan parameter on the Stripe
         // subscription object. This will force Stripe to resume this subscription
         // where we left off. Then, we'll set the proper trial ending timestamp.
-        $subscription->plan = $this->stripePlan;
+        $subscription->plan = $this->stripe_plan;
 
         if ($this->onTrial()) {
-            $subscription->trial_end = $this->trialEndAt->getTimestamp();
+            $subscription->trial_end = $this->trial_end_at->getTimestamp();
         } else {
             $subscription->trial_end = 'now';
         }
@@ -397,7 +396,7 @@ class SubscriptionModel extends ActiveRecord
         // Finally, we will remove the ending timestamp from the user's record in the
         // local database to indicate that the subscription is active again and is
         // no longer "cancelled". Then we will save this record in the database.
-        $this->endAt = null;
+        $this->end_at = null;
         $this->save();
 
         return $this;
@@ -410,6 +409,6 @@ class SubscriptionModel extends ActiveRecord
      */
     public function asStripeSubscription()
     {
-        return $this->user->asStripeCustomer()->subscriptions->retrieve($this->stripeId);
+        return $this->user->asStripeCustomer()->subscriptions->retrieve($this->stripe_id);
     }
 }

@@ -2,11 +2,11 @@
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii2mod\cashier\Cashier;
+use bigdropinc\cashier\Cashier;
 
 /* @var $user \yii\db\ActiveRecord */
-/* @var $invoice \yii2mod\cashier\Invoice */
-/* @var $subscription \yii2mod\cashier\InvoiceItem */
+/* @var $invoice \bigdropinc\cashier\Invoice */
+/* @var $subscription \bigdropinc\cashier\InvoiceItem */
 ?>
 
 <!DOCTYPE html>

@@ -8,8 +8,7 @@
 
 This extension is the port of [Laravel's Cashier package](https://laravel.com/docs/5.4/billing)
 
-[![Latest Stable Version](https://poser.pugx.org/yii2mod/yii2-cashier/v/stable)](https://packagist.org/packages/yii2mod/yii2-cashier) [![Total Downloads](https://poser.pugx.org/yii2mod/yii2-cashier/downloads)](https://packagist.org/packages/yii2mod/yii2-cashier) [![License](https://poser.pugx.org/yii2mod/yii2-cashier/license)](https://packagist.org/packages/yii2mod/yii2-cashier)
-[![Build Status](https://travis-ci.org/yii2mod/yii2-cashier.svg?branch=master)](https://travis-ci.org/yii2mod/yii2-cashier)
+[![Latest Stable Version](https://poser.pugx.org/bigdropinc/yii2-cashier/v/stable)](https://packagist.org/packages/bigdropinc/yii2-cashier) [![Total Downloads](https://poser.pugx.org/bigdropinc/yii2-cashier/downloads)](https://packagist.org/packages/bigdropinc/yii2-cashier) [![License](https://poser.pugx.org/bigdropinc/yii2-cashier/license)](https://packagist.org/packages/bigdropinc/yii2-cashier)
 
 Installation
 ------------
@@ -19,13 +18,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require --prefer-dist yii2mod/yii2-cashier "*"
+php composer.phar require --prefer-dist bigdropinc/yii2-cashier "*"
 ```
 
 or add
 
 ```
-"yii2mod/yii2-cashier": "*"
+"bigdropinc/yii2-cashier": "*"
 ```
 
 to the require section of your `composer.json` file.
@@ -48,33 +47,33 @@ if ($this->db->driverName === 'mysql') {
 
 $this->createTable('subscription', [
     'id' => $this->primaryKey(),
-    'userId' => $this->integer()->notNull(),
+    'user_id' => $this->integer()->notNull(),
     'name' => $this->string()->notNull(),
-    'stripeId' => $this->string()->notNull(),
-    'stripePlan' => $this->string()->notNull(),
+    'stripe_id' => $this->string()->notNull(),
+    'stripe_plan' => $this->string()->notNull(),
     'quantity' => $this->integer()->notNull(),
-    'trialEndAt' => $this->timestamp()->null(),
-    'endAt' => $this->timestamp()->null(),
-    'createdAt' => $this->timestamp()->null(),
-    'updatedAt' => $this->timestamp()->null()
+    'trial_end_at' => $this->timestamp()->null(),
+    'end_at' => $this->timestamp()->null(),
+    'created_at' => $this->dateTime()->null(),
+    'updated_at' => $this->dateTime()->null()
 ], $tableOptions);
 
-$this->addColumn('user', 'stripeId', $this->string());
+$this->addColumn('user', 'stripe_id', $this->string());
 $this->addColumn('user', 'cardBrand', $this->string());
 $this->addColumn('user', 'cardLastFour', $this->string());
-$this->addColumn('user', 'trialEndAt', $this->timestamp()->null());
+$this->addColumn('user', 'trial_end_at', $this->timestamp()->null());
 ```
 > Also you can apply migration by the following command:
 
 ```php
-php yii migrate --migrationPath=@vendor/yii2mod/yii2-cashier/migrations
+php yii migrate --migrationPath=@vendor/bigdropinc/yii2-cashier/migrations
 ```
 
 **Model Setup**
 
 Next, add the Billable trait to your User model definition:
 ```php
-use yii2mod\cashier\Billable;
+use bigdropinc\cashier\Billable;
 
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -249,7 +248,7 @@ To cancel a subscription, simply call the cancel method on the user's subscripti
 $user->subscription('main')->cancel();
 ```
 
-When a subscription is cancelled, Cashier will automatically set the ```endAt``` column in your database. This column is used to know when the subscribed method should begin returning false. For example, if a customer cancels a subscription on March 1st, but the subscription was not scheduled to end until March 5th, the subscribed method will continue to return true until March 5th.
+When a subscription is cancelled, Cashier will automatically set the ```end_at``` column in your database. This column is used to know when the subscribed method should begin returning false. For example, if a customer cancels a subscription on March 1st, but the subscription was not scheduled to end until March 5th, the subscribed method will continue to return true until March 5th.
 
 You may determine if a user has cancelled their subscription but are still on their "grace period" using the onGracePeriod method:
 
@@ -302,16 +301,16 @@ if ($user->subscription('main')->onTrial()) {
 
 #### Without Credit Card Up Front
 
-If you would like to offer trial periods without collecting the user's payment method information up front, you may simply set the trialEndAt column on the user record to your desired trial ending date. For example, this is typically done during user registration:
+If you would like to offer trial periods without collecting the user's payment method information up front, you may simply set the trial_end_at column on the user record to your desired trial ending date. For example, this is typically done during user registration:
 
 ```php
 $user = new User([
     // Populate other user properties...
-    'trialEndAt' => Carbon::now()->addDays(10),
+    'trial_end_at' => Carbon::now()->addDays(10),
 ]);
 ```
 
-Cashier refers to this type of trial as a "generic trial", since it is not attached to any existing subscription. The onTrial method on the User instance will return true if the current date is not past the value of trialEndAt:
+Cashier refers to this type of trial as a "generic trial", since it is not attached to any existing subscription. The onTrial method on the User instance will return true if the current date is not past the value of trial_end_at:
 
 ```php
 if ($user->onTrial()) {
@@ -345,7 +344,7 @@ Just add the WebhookController to the ```controllerMap``` in your configuration 
 ```php
 'controllerMap' => [
         //Stripe webhook
-        'webhook' => 'yii2mod\cashier\controllers\WebhookController',
+        'webhook' => 'bigdropinc\cashier\controllers\WebhookController',
     ],
 ```
 

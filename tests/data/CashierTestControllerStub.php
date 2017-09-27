@@ -1,13 +1,13 @@
 <?php
 
-namespace yii2mod\cashier\tests\data;
+namespace bigdropinc\cashier\tests\data;
 
-use yii2mod\cashier\controllers\WebhookController;
+use bigdropinc\cashier\controllers\WebhookController;
 
 /**
  * Class CashierTestControllerStub
  *
- * @package yii2mod\cashier\tests\data
+ * @package bigdropinc\cashier\tests\data
  */
 class CashierTestControllerStub extends WebhookController
 {
