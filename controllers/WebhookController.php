@@ -30,7 +30,7 @@ class WebhookController extends Controller
     {
         return [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'handle-webhook' => ['post'],
                 ],
@@ -46,15 +46,18 @@ class WebhookController extends Controller
     public function actionHandleWebhook()
     {
         $payload = json_decode(Yii::$app->request->getRawBody(), true);
+
         if (!$this->eventExistsOnStripe($payload['id'])) {
             return;
         }
+
         $method = 'handle' . Inflector::camelize(str_replace('.', '_', $payload['type']));
+
         if (method_exists($this, $method)) {
             return $this->{$method}($payload);
-        } else {
-            return $this->missingMethod();
         }
+
+        return $this->missingMethod();
     }
 
     /**
@@ -71,7 +74,7 @@ class WebhookController extends Controller
             $subscriptions = $user->getSubscriptions()->all();
             /* @var $subscription SubscriptionModel */
             foreach ($subscriptions as $subscription) {
-                if ($subscription->stripeId === $payload['data']['object']['id']) {
+                if ($subscription->stripe_id === $payload['data']['object']['id']) {
                     $subscription->markAsCancelled();
                 }
             }
@@ -94,7 +97,7 @@ class WebhookController extends Controller
     {
         $model = Yii::$app->user->identityClass;
 
-        return $model::findOne(['stripeId' => $stripeId]);
+        return $model::findOne(['stripe_id' => $stripeId]);
     }
 
     /**

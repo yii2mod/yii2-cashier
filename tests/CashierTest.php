@@ -32,7 +32,7 @@ class CashierTest extends TestCase
         $user->newSubscription('main', 'monthly-10-1')->create($this->getTestToken());
 
         $this->assertEquals(1, count($user->subscriptions));
-        $this->assertNotNull($user->subscription('main')->stripeId);
+        $this->assertNotNull($user->subscription('main')->stripe_id);
         $this->assertTrue($user->subscribed('main'));
         $this->assertTrue($user->subscribedToPlan('monthly-10-1', 'main'));
         $this->assertFalse($user->subscribedToPlan('monthly-10-1', 'something'));
@@ -52,13 +52,13 @@ class CashierTest extends TestCase
         $this->assertTrue($subscription->onGracePeriod());
 
         // Modify Ends Date To Past
-        $oldGracePeriod = $subscription->endAt;
-        $subscription->updateAttributes(['endAt' => Carbon::now()->subDays(5)]);
+        $oldGracePeriod = $subscription->ends_at;
+        $subscription->updateAttributes(['ends_at' => Carbon::now()->subDays(5)]);
 
         $this->assertFalse($subscription->active());
         $this->assertTrue($subscription->cancelled());
         $this->assertFalse($subscription->onGracePeriod());
-        $subscription->updateAttributes(['endAt' => $oldGracePeriod]);
+        $subscription->updateAttributes(['ends_at' => $oldGracePeriod]);
 
         // Resume Subscription
         $subscription->resume();
@@ -79,7 +79,7 @@ class CashierTest extends TestCase
         // Swap Plan
         $subscription->swap('monthly-10-2');
 
-        $this->assertEquals('monthly-10-2', $subscription->stripePlan);
+        $this->assertEquals('monthly-10-2', $subscription->stripe_plan);
 
         // Invoice Tests
         $invoice = $user->invoices()[1];
@@ -97,7 +97,9 @@ class CashierTest extends TestCase
 
         // Create Subscription
         $user->newSubscription('main', 'monthly-10-1')
-            ->withCoupon('coupon-1')->create($this->getTestToken());
+            ->withCoupon('coupon-1')
+            ->create($this->getTestToken());
+
         $subscription = $user->subscription('main');
 
         $this->assertTrue($user->subscribed('main'));
@@ -120,9 +122,11 @@ class CashierTest extends TestCase
     {
         $user = new User();
         $this->assertFalse($user->onGenericTrial());
-        $user->trialEndAt = Carbon::tomorrow();
+
+        $user->trial_ends_at = Carbon::tomorrow();
         $this->assertTrue($user->onGenericTrial());
-        $user->trialEndAt = Carbon::today()->subDays(5);
+
+        $user->trial_ends_at = Carbon::today()->subDays(5);
         $this->assertFalse($user->onGenericTrial());
     }
 
@@ -132,12 +136,14 @@ class CashierTest extends TestCase
 
         // Create Subscription
         $user->newSubscription('main', 'monthly-10-1')
-            ->trialDays(7)->create($this->getTestToken());
+            ->trialDays(7)
+            ->create($this->getTestToken());
+
         $subscription = $user->subscription('main');
 
         $this->assertTrue($subscription->active());
         $this->assertTrue($subscription->onTrial());
-        $this->assertEquals(Carbon::today()->addDays(7)->day, $subscription->trialEndAt->day);
+        $this->assertEquals(Carbon::today()->addDays(7)->day, $subscription->trial_ends_at->day);
 
         // Cancel Subscription
         $subscription->cancel();
@@ -151,7 +157,7 @@ class CashierTest extends TestCase
         $this->assertTrue($subscription->active());
         $this->assertFalse($subscription->onGracePeriod());
         $this->assertTrue($subscription->onTrial());
-        $this->assertEquals(Carbon::today()->addDays(7)->day, $subscription->trialEndAt->day);
+        $this->assertEquals(Carbon::today()->addDays(7)->day, $subscription->trial_ends_at->day);
     }
 
     public function testApplyingCouponsToExistingCustomers()
@@ -181,8 +187,8 @@ class CashierTest extends TestCase
             'type' => 'customer.subscription.deleted',
             'data' => [
                 'object' => [
-                    'id' => $subscription->stripeId,
-                    'customer' => $user->stripeId,
+                    'id' => $subscription->stripe_id,
+                    'customer' => $user->stripe_id,
                 ],
             ],
         ]);

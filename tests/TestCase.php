@@ -85,30 +85,30 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
         // Structure :
 
-        $db->createCommand()->createTable('subscription', [
+        $db->createCommand()->createTable('subscriptions', [
             'id' => 'pk',
-            'userId' => 'integer not null',
+            'user_id' => 'integer not null',
             'name' => 'string not null',
-            'stripeId' => 'string not null',
-            'stripePlan' => 'string not null',
+            'stripe_id' => 'string not null',
+            'stripe_plan' => 'string not null',
             'quantity' => 'integer not null',
-            'trialEndAt' => 'timestamp null default null',
-            'endAt' => 'timestamp null default null',
-            'createdAt' => 'timestamp null default null',
-            'updatedAt' => 'timestamp null default null',
+            'trial_ends_at' => 'timestamp null default null',
+            'ends_at' => 'timestamp null default null',
+            'created_at' => 'timestamp null default null',
+            'updated_at' => 'timestamp null default null',
         ])->execute();
 
-        $db->createCommand()->createTable('user', [
+        $db->createCommand()->createTable('users', [
             'id' => 'pk',
             'username' => 'string',
             'email' => 'string',
-            'stripeId' => 'string',
-            'cardBrand' => 'string',
-            'cardLastFour' => 'string',
-            'trialEndAt' => 'timestamp null default null',
+            'stripe_id' => 'string',
+            'card_brand' => 'string',
+            'card_last_four' => 'string',
+            'trial_ends_at' => 'timestamp null default null',
         ])->execute();
 
-        $db->createCommand()->insert('user', [
+        $db->createCommand()->insert('users', [
             'username' => 'John Doe',
             'email' => 'johndoe@domain.com',
         ])->execute();
