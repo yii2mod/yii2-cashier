@@ -38,8 +38,10 @@ class Cashier
      *
      * @param string $currency
      * @param string|null $symbol
+     *
+     * @throws Exception
      */
-    public static function useCurrency($currency, $symbol = null)
+    public static function useCurrency(string $currency, ?string $symbol = null): void
     {
         static::$currency = $currency;
         static::useCurrencySymbol($symbol ?: static::guessCurrencySymbol($currency));
@@ -54,7 +56,7 @@ class Cashier
      *
      * @throws Exception
      */
-    protected static function guessCurrencySymbol($currency)
+    protected static function guessCurrencySymbol(string $currency): string
     {
         switch (strtolower($currency)) {
             case 'usd':
@@ -75,7 +77,7 @@ class Cashier
      *
      * @return string
      */
-    public static function usesCurrency()
+    public static function usesCurrency(): string
     {
         return static::$currency;
     }
@@ -85,7 +87,7 @@ class Cashier
      *
      * @param string $symbol
      */
-    public static function useCurrencySymbol($symbol)
+    public static function useCurrencySymbol(string $symbol): void
     {
         static::$currencySymbol = $symbol;
     }
@@ -95,7 +97,7 @@ class Cashier
      *
      * @return string
      */
-    public static function usesCurrencySymbol()
+    public static function usesCurrencySymbol(): string
     {
         return static::$currencySymbol;
     }
@@ -105,7 +107,7 @@ class Cashier
      *
      * @param callable $callback
      */
-    public static function formatCurrencyUsing(callable $callback)
+    public static function formatCurrencyUsing(callable $callback): void
     {
         static::$formatCurrencyUsing = $callback;
     }
@@ -117,7 +119,7 @@ class Cashier
      *
      * @return string
      */
-    public static function formatAmount($amount)
+    public static function formatAmount(int $amount): string
     {
         if (static::$formatCurrencyUsing) {
             return call_user_func(static::$formatCurrencyUsing, $amount);

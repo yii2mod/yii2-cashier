@@ -7,6 +7,7 @@ use Exception;
 use InvalidArgumentException;
 use Stripe\Charge;
 use Stripe\Customer;
+use Stripe\Error\Card;
 use Stripe\Error\InvalidRequest;
 use Stripe\Invoice as StripeInvoice;
 use Stripe\InvoiceItem as StripeInvoiceItem;
@@ -37,11 +38,11 @@ trait Billable
      * @param int $amount
      * @param array $options
      *
-     * @return \Stripe\Charge
+     * @return Charge
      *
-     * @throws \Stripe\Error\Card
+     * @throws Card
      */
-    public function charge($amount, array $options = [])
+    public function charge($amount, array $options = []): Charge
     {
         $options = array_merge([
             'currency' => $this->preferredCurrency(),
@@ -49,8 +50,8 @@ trait Billable
 
         $options['amount'] = $amount;
 
-        if (!array_key_exists('source', $options) && $this->stripeId) {
-            $options['customer'] = $this->stripeId;
+        if (!array_key_exists('source', $options) && $this->stripe_id) {
+            $options['customer'] = $this->stripe_id;
         }
 
         if (!array_key_exists('source', $options) && !array_key_exists('customer', $options)) {
@@ -68,7 +69,7 @@ trait Billable
      *
      * @return StripeRefund
      */
-    public function refund($charge, array $options = [])
+    public function refund($charge, array $options = []): StripeRefund
     {
         $options['charge'] = $charge;
 
@@ -80,9 +81,9 @@ trait Billable
      *
      * @return bool
      */
-    public function hasCardOnFile()
+    public function hasCardOnFile(): bool
     {
-        return (bool)$this->cardBrand;
+        return (bool) $this->card_brand;
     }
 
     /**
@@ -92,18 +93,18 @@ trait Billable
      * @param int $amount
      * @param array $options
      *
-     * @return bool
+     * @return bool|StripeInvoice
      *
-     * @throws \Stripe\Error\Card
+     * @throws Card
      */
     public function invoiceFor($description, $amount, array $options = [])
     {
-        if (!$this->stripeId) {
+        if (!$this->stripe_id) {
             throw new InvalidArgumentException('User is not a customer. See the createAsStripeCustomer method.');
         }
 
         $options = array_merge([
-            'customer' => $this->stripeId,
+            'customer' => $this->stripe_id,
             'amount' => $amount,
             'currency' => $this->preferredCurrency(),
             'description' => $description,
@@ -124,7 +125,7 @@ trait Billable
      *
      * @return SubscriptionBuilder
      */
-    public function newSubscription($subscription, $plan)
+    public function newSubscription(string $subscription, string $plan): SubscriptionBuilder
     {
         return new SubscriptionBuilder($this, $subscription, $plan);
     }
@@ -137,7 +138,7 @@ trait Billable
      *
      * @return bool
      */
-    public function onTrial($subscription = 'default', $plan = null)
+    public function onTrial(string $subscription = 'default', ?string $plan = null): bool
     {
         if (func_num_args() === 0 && $this->onGenericTrial()) {
             return true;
@@ -148,7 +149,7 @@ trait Billable
         }
 
         return $subscription && $subscription->onTrial() &&
-        $subscription->stripePlan === $plan;
+            $subscription->stripePlan === $plan;
     }
 
     /**
@@ -156,9 +157,9 @@ trait Billable
      *
      * @return bool
      */
-    public function onGenericTrial()
+    public function onGenericTrial(): bool
     {
-        return $this->trialEndAt && Carbon::now()->lt(Carbon::createFromFormat('Y-m-d H:i:s', $this->trialEndAt));
+        return $this->trial_ends_at && Carbon::now()->lt(Carbon::createFromFormat('Y-m-d H:i:s', $this->trial_ends_at));
     }
 
     /**
@@ -169,18 +170,20 @@ trait Billable
      *
      * @return bool
      */
-    public function subscribed($subscription = 'default', $plan = null)
+    public function subscribed(string $subscription = 'default', ?string $plan = null): bool
     {
         $subscription = $this->subscription($subscription);
+
         if (is_null($subscription)) {
             return false;
         }
+
         if (is_null($plan)) {
             return $subscription->valid();
         }
 
         return $subscription->valid() &&
-        $subscription->stripePlan === $plan;
+            $subscription->stripe_plan === $plan;
     }
 
     /**
@@ -190,7 +193,7 @@ trait Billable
      *
      * @return SubscriptionModel|null
      */
-    public function subscription($subscription = 'default')
+    public function subscription(string $subscription = 'default'): ?SubscriptionModel
     {
         return $this->getSubscriptions()->where(['name' => $subscription])->one();
     }
@@ -200,19 +203,19 @@ trait Billable
      */
     public function getSubscriptions()
     {
-        return $this->hasMany(SubscriptionModel::className(), ['userId' => 'id'])->orderBy(['createdAt' => SORT_DESC]);
+        return $this->hasMany(SubscriptionModel::class, ['user_id' => 'id'])->orderBy(['created_at' => SORT_DESC]);
     }
 
     /**
      * Invoice the billable entity outside of regular billing cycle.
      *
-     * @return bool
+     * @return bool|StripeInvoice
      */
     public function invoice()
     {
-        if ($this->stripeId) {
+        if ($this->stripe_id) {
             try {
-                return StripeInvoice::create(['customer' => $this->stripeId], $this->getStripeKey())->pay();
+                return StripeInvoice::create(['customer' => $this->stripe_id], $this->getStripeKey())->pay();
             } catch (InvalidRequest $e) {
                 return false;
             }
@@ -226,11 +229,11 @@ trait Billable
      *
      * @return Invoice|null
      */
-    public function upcomingInvoice()
+    public function upcomingInvoice(): ?Invoice
     {
         try {
             $stripeInvoice = StripeInvoice::upcoming(
-                ['customer' => $this->stripeId], ['api_key' => $this->getStripeKey()]
+                ['customer' => $this->stripe_id], ['api_key' => $this->getStripeKey()]
             );
 
             return new Invoice($this, $stripeInvoice);
@@ -245,7 +248,7 @@ trait Billable
      *
      * @return Invoice|null
      */
-    public function findInvoice($id)
+    public function findInvoice(string $id): Invoice
     {
         try {
             return new Invoice($this, StripeInvoice::retrieve($id, $this->getStripeKey()));
@@ -262,7 +265,7 @@ trait Billable
      *
      * @throws NotFoundHttpException
      */
-    public function findInvoiceOrFail($id)
+    public function findInvoiceOrFail(string $id)
     {
         $invoice = $this->findInvoice($id);
 
@@ -281,7 +284,7 @@ trait Billable
      *
      * @return Response
      */
-    public function downloadInvoice($id, array $data)
+    public function downloadInvoice(string $id, array $data)
     {
         return $this->findInvoiceOrFail($id)->download($data);
     }
@@ -294,7 +297,7 @@ trait Billable
      *
      * @return array
      */
-    public function invoices($includePending = false, $parameters = [])
+    public function invoices(bool $includePending = false, array $parameters = []): array
     {
         $invoices = [];
 
@@ -323,7 +326,7 @@ trait Billable
      *
      * @return array
      */
-    public function invoicesIncludingPending(array $parameters = [])
+    public function invoicesIncludingPending(array $parameters = []): array
     {
         return $this->invoices(true, $parameters);
     }
@@ -333,7 +336,7 @@ trait Billable
      *
      * @param string $token
      */
-    public function updateCard($token)
+    public function updateCard(string $token): void
     {
         $customer = $this->asStripeCustomer();
         $token = Token::retrieve($token, ['api_key' => $this->getStripeKey()]);
@@ -376,8 +379,8 @@ trait Billable
         if ($defaultCard) {
             $this->fillCardDetails($defaultCard)->save();
         } else {
-            $this->cardBrand = null;
-            $this->cardLastFour = null;
+            $this->card_brand = null;
+            $this->card_last_four = null;
             $this->update(false);
         }
 
@@ -394,8 +397,8 @@ trait Billable
     protected function fillCardDetails($card)
     {
         if ($card) {
-            $this->cardBrand = $card->brand;
-            $this->cardLastFour = $card->last4;
+            $this->card_brand = $card->brand;
+            $this->card_last_four = $card->last4;
         }
 
         return $this;
@@ -423,7 +426,7 @@ trait Billable
      *
      * @return bool
      */
-    public function subscribedToPlan($plans, $subscription = 'default')
+    public function subscribedToPlan($plans, $subscription = 'default'): bool
     {
         $subscription = $this->subscription($subscription);
 
@@ -431,8 +434,8 @@ trait Billable
             return false;
         }
 
-        foreach ((array)$plans as $plan) {
-            if ($subscription->stripePlan === $plan) {
+        foreach ((array) $plans as $plan) {
+            if ($subscription->stripe_plan === $plan) {
                 return true;
             }
         }
@@ -447,9 +450,9 @@ trait Billable
      *
      * @return bool
      */
-    public function onPlan($plan)
+    public function onPlan($plan): bool
     {
-        $plan = $this->getSubscriptions()->where(['stripePlan' => $plan])->one();
+        $plan = $this->getSubscriptions()->where(['stripe_plan' => $plan])->one();
 
         return !is_null($plan) && $plan->valid();
     }
@@ -459,9 +462,9 @@ trait Billable
      *
      * @return bool
      */
-    public function hasStripeId()
+    public function hasStripeId(): bool
     {
-        return !is_null($this->stripeId);
+        return !is_null($this->stripe_id);
     }
 
     /**
@@ -472,7 +475,7 @@ trait Billable
      *
      * @return Customer
      */
-    public function createAsStripeCustomer($token, array $options = [])
+    public function createAsStripeCustomer(string $token, array $options = []): Customer
     {
         $options = array_key_exists('email', $options)
             ? $options : array_merge($options, ['email' => $this->email]);
@@ -482,7 +485,7 @@ trait Billable
         // and allow us to retrieve users from Stripe later when we need to work.
         $customer = Customer::create($options, $this->getStripeKey());
 
-        $this->stripeId = $customer->id;
+        $this->stripe_id = $customer->id;
 
         $this->save();
 
@@ -499,11 +502,11 @@ trait Billable
     /**
      * Get the Stripe customer for the user.
      *
-     * @return \Stripe\Customer
+     * @return Customer
      */
-    public function asStripeCustomer()
+    public function asStripeCustomer(): Customer
     {
-        return Customer::retrieve($this->stripeId, $this->getStripeKey());
+        return Customer::retrieve($this->stripe_id, $this->getStripeKey());
     }
 
     /**
@@ -511,7 +514,7 @@ trait Billable
      *
      * @return string
      */
-    public function preferredCurrency()
+    public function preferredCurrency(): string
     {
         return Cashier::usesCurrency();
     }
@@ -521,7 +524,7 @@ trait Billable
      *
      * @return int
      */
-    public function taxPercentage()
+    public function taxPercentage(): int
     {
         return 0;
     }
@@ -531,7 +534,7 @@ trait Billable
      *
      * @return string
      */
-    public static function getStripeKey()
+    public static function getStripeKey(): string
     {
         return static::$stripeKey ?: Yii::$app->params['stripe']['apiKey'];
     }
@@ -539,9 +542,9 @@ trait Billable
     /**
      * Set the Stripe API key.
      *
-     * @param  string $key
+     * @param string $key
      */
-    public static function setStripeKey($key)
+    public static function setStripeKey($key): void
     {
         static::$stripeKey = $key;
     }

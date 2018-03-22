@@ -46,23 +46,23 @@ if ($this->db->driverName === 'mysql') {
     $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
 }
 
-$this->createTable('subscription', [
+$this->createTable('subscriptions', [
     'id' => $this->primaryKey(),
-    'userId' => $this->integer()->notNull(),
+    'user_id' => $this->integer()->notNull(),
     'name' => $this->string()->notNull(),
-    'stripeId' => $this->string()->notNull(),
-    'stripePlan' => $this->string()->notNull(),
+    'stripe_id' => $this->string()->notNull(),
+    'stripe_plan' => $this->string()->notNull(),
     'quantity' => $this->integer()->notNull(),
-    'trialEndAt' => $this->timestamp()->null(),
-    'endAt' => $this->timestamp()->null(),
-    'createdAt' => $this->timestamp()->null(),
-    'updatedAt' => $this->timestamp()->null()
+    'trial_ends_at' => $this->timestamp()->null(),
+    'ends_at' => $this->timestamp()->null(),
+    'created_at' => $this->timestamp()->null(),
+    'updated_at' => $this->timestamp()->null()
 ], $tableOptions);
 
-$this->addColumn('user', 'stripeId', $this->string());
-$this->addColumn('user', 'cardBrand', $this->string());
-$this->addColumn('user', 'cardLastFour', $this->string());
-$this->addColumn('user', 'trialEndAt', $this->timestamp()->null());
+$this->addColumn('users', 'stripe_id', $this->string());
+$this->addColumn('users', 'card_brand', $this->string());
+$this->addColumn('users', 'card_last_four', $this->string());
+$this->addColumn('users', 'trial_ends_at', $this->timestamp()->null());
 ```
 > Also you can apply migration by the following command:
 
@@ -307,7 +307,7 @@ If you would like to offer trial periods without collecting the user's payment m
 ```php
 $user = new User([
     // Populate other user properties...
-    'trialEndAt' => Carbon::now()->addDays(10),
+    'trial_ends_at' => Carbon::now()->addDays(10),
 ]);
 ```
 

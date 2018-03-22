@@ -183,13 +183,13 @@ class SubscriptionBuilder
             $trialEndsAt = $this->trialDays ? Carbon::now()->addDays($this->trialDays) : null;
         }
         $subscriptionModel = new SubscriptionModel([
-            'userId' => $this->user->id,
+            'user_id' => $this->user->id,
             'name' => $this->name,
-            'stripeId' => $subscription->id,
-            'stripePlan' => $this->plan,
+            'stripe_id' => $subscription->id,
+            'stripe_plan' => $this->plan,
             'quantity' => $this->quantity,
-            'trialEndAt' => $trialEndsAt,
-            'endAt' => null,
+            'trial_ends_at' => $trialEndsAt,
+            'ends_at' => null,
         ]);
         if ($subscriptionModel->save()) {
             return $subscriptionModel;
@@ -208,7 +208,7 @@ class SubscriptionBuilder
      */
     protected function getStripeCustomer($token = null, array $options = [])
     {
-        if (!$this->user->stripeId) {
+        if (!$this->user->stripe_id) {
             $customer = $this->user->createAsStripeCustomer(
                 $token, array_merge($options, array_filter(['coupon' => $this->coupon]))
             );
