@@ -95,6 +95,7 @@ Next, you should configure your params section in your configuration file:
 'params' => [
         .....
         'stripe' => [
+            'pubKey' => 'Your Publishable Api Key for Stripe Checkout',
             'apiKey' => 'Your Secret Api Key'
         ],
     ],

@@ -17,6 +17,8 @@ use yii2mod\behaviors\CarbonBehavior;
  * @property string $name
  * @property string $stripe_id
  * @property string $stripe_plan
+ * @property int $metadata_id
+ * @property string $client_reference_id
  * @property int $quantity
  * @property Carbon $trial_ends_at
  * @property Carbon $ends_at
@@ -55,9 +57,9 @@ class SubscriptionModel extends ActiveRecord
     {
         return [
             [['user_id', 'name', 'stripe_id', 'stripe_plan', 'quantity'], 'required'],
-            [['user_id', 'quantity'], 'integer'],
+            [['user_id', 'quantity', 'metadata_id'], 'integer'],
             [['trial_ends_at', 'ends_at'], 'safe'],
-            [['name', 'stripe_id', 'stripe_plan'], 'string', 'max' => 255],
+            [['name', 'stripe_id', 'stripe_plan', 'client_reference_id', 'status'], 'string', 'max' => 255],
         ];
     }
 
@@ -72,6 +74,9 @@ class SubscriptionModel extends ActiveRecord
             'name' => Yii::t('app', 'Name'),
             'stripe_id' => Yii::t('app', 'Stripe ID'),
             'stripe_plan' => Yii::t('app', 'Stripe Plan'),
+            'status' => Yii::t('app', 'Status'),
+            'metadata_id' => Yii::t('app', 'Metadata ID'),
+            'client_reference_id' => Yii::t('app', 'Client reference ID'),
             'quantity' => Yii::t('app', 'Quantity'),
             'trial_ends_at' => Yii::t('app', 'Trial End At'),
             'ends_at' => Yii::t('app', 'End At'),

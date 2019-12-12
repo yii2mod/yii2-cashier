@@ -17,6 +17,7 @@ use Yii;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii2mod\cashier\models\SubscriptionModel;
+use yii\helpers\Url;
 
 /**
  * Class Billable
@@ -31,6 +32,78 @@ trait Billable
      * @var string
      */
     protected static $stripeKey;
+
+    /**
+     * Get the Stripe customer instance for the current user and token.
+     * (copied from SubscriptionBuilder)
+     *
+     * @return \Stripe\Customer
+     */
+    protected function getStripeCustomer()
+    {
+        if (!$this->stripe_id) {
+            $customer = $this->createAsStripeCustomer(null);
+        } else {
+            $customer = $this->asStripeCustomer();
+        }
+
+        return $customer;
+    }
+
+    /**
+     * Make a "one off" charge on the customer for the given amount.
+     *
+     * @param int $amount
+     * @param array $options
+     *
+     * @return \Stripe\Checkout\Session
+     *
+     * @throws Card
+     */
+    public function createCheckoutSessionForSubscription($planID, array $optionsParam = []): \Stripe\Checkout\Session
+    {
+        $customer = $this->getStripeCustomer();
+        if (!$this->stripe_id) {
+            throw new InvalidArgumentException('No stripe customer provided.');
+        }
+
+        $controller_url_name = '';
+        if(array_key_exists('controller_url_name', $optionsParam)){
+            $controller_url_name = $optionsParam['controller_url_name'] . '/';
+        }
+
+        $options = [
+            'customer' => $this->stripe_id,
+            'payment_method_types' => ['card'],
+            'subscription_data' => [
+              'items'=> [
+                ['plan'=> $planID, 'quantity'=> 1]
+              ],
+            ],
+            'success_url' => Url::base(true) . '/' . $controller_url_name . 'success?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' =>  Url::base(true) . '/' . $controller_url_name . 'cancel',
+        ];
+
+        if(array_key_exists('success_url', $optionsParam)){
+            $options['success_url'] = $optionsParam['success_url'];
+        }
+        if(array_key_exists('cancel_url', $optionsParam)){
+            $options['cancel_url'] = $optionsParam['cancel_url'];
+        }   
+        if(array_key_exists('client_reference_id', $optionsParam)){
+            $options['client_reference_id'] = strval($optionsParam['client_reference_id']);
+        }   
+        if(array_key_exists('metadata', $optionsParam)){
+            $options['subscription_data']['metadata'] = $optionsParam['metadata'];
+        }   
+
+        // if($this->email){
+        //     $options['customer_email'] = 'max1000@gmail.com';
+        // }
+
+        $session = \Stripe\Checkout\Session::create($options, ['api_key' => $this->getStripeKey()] );
+        return $session;
+    }
 
     /**
      * Make a "one off" charge on the customer for the given amount.
@@ -131,6 +204,42 @@ trait Billable
     }
 
     /**
+     * Create a new subscription from checkout params.
+     *
+     * @param array $payloadDataObject
+     *
+     * @return SubscriptionModel
+     */
+    public function loadSubscriptionModel($subscriptionID, $clientReferenceId)
+    {
+        $subscriptionBuilder = new SubscriptionBuilder($this, '', '');
+        return $subscriptionBuilder->loadSubscriptionModel($subscriptionID, $clientReferenceId);
+    }
+
+    /**
+     * Create a new subscription from checkout params.
+     *
+     * @param stirng $stripe_id costumer ID
+     *
+     * @return Boolean
+     */
+    public function updateSubscriptionModels()
+    {
+        if (!$this->stripe_id) {
+            return false;
+        }
+
+        \Stripe\Stripe::setApiKey(Yii::$app->params['stripe']['apiKey']);
+        $stripeSubscriptions = \Stripe\Subscription::all(['customer' => $this->stripe_id]) ;
+        foreach ($stripeSubscriptions as $stripeSubscription) {
+            $subscriptionBuilder = new SubscriptionBuilder($this, '', '');
+            $subscriptionBuilder->updateSubscriptionModel($stripeSubscription, null);
+        }
+
+        return true;
+    }
+
+    /**
      * Determine if the user is on trial.
      *
      * @param string $subscription
@@ -196,6 +305,18 @@ trait Billable
     public function subscription(string $subscription = 'default'): ?SubscriptionModel
     {
         return $this->getSubscriptions()->where(['name' => $subscription])->one();
+    }
+
+    /**
+     * Get a subscription instance by name.
+     *
+     * @param string $subscription
+     *
+     * @return SubscriptionModel|null
+     */
+    public function subscriptionByStripeID(string $stripe_id = 'default'): ?SubscriptionModel
+    {
+        return $this->getSubscriptions()->where(['stripe_id' => $stripe_id])->one();
     }
 
     /**
@@ -470,12 +591,12 @@ trait Billable
     /**
      * Create a Stripe customer for the given user.
      *
-     * @param string $token
+     * @param string|null $token
      * @param array $options
      *
      * @return Customer
      */
-    public function createAsStripeCustomer(string $token, array $options = []): Customer
+    public function createAsStripeCustomer($token = null, array $options = []): Customer
     {
         $options = array_key_exists('email', $options)
             ? $options : array_merge($options, ['email' => $this->email]);
