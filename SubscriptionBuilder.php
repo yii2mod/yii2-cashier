@@ -212,7 +212,7 @@ class SubscriptionBuilder
     {
         $customer = $this->getStripeCustomer();
         $stripeSubscription = \Stripe\Subscription::retrieve($subscriptionID, Yii::$app->params['stripe']['apiKey']);
-        $this->updateSubscriptionModel($stripeSubscription, $clientReferenceId);
+        return $this->updateSubscriptionModel($stripeSubscription, $clientReferenceId);
     }
 
     /**
@@ -239,10 +239,10 @@ class SubscriptionBuilder
 
         $metadataMap = $this->user->billableMapMetadataAttributes();
         $metadata_id = null;
-        if($stripeSubscription->metadata->offsetExists($metadataMap['metadata_id'])){
+        if(array_key_exists('metadata_id', $metadataMap) && $stripeSubscription->metadata->offsetExists($metadataMap['metadata_id'])){
             $metadata_id = $stripeSubscription->metadata->{$metadataMap['metadata_id']};
         }
-
+        
         // instace creation or update
         $subscriptionModel = SubscriptionModel::find()->where(['stripe_id' => $stripeSubscription->id])->one();
         if($subscriptionModel==null){
@@ -300,7 +300,7 @@ class SubscriptionBuilder
      *
      * @return array
      */
-    protected function buildPayload()
+    public function buildPayload()
     {
         return array_filter([
             'plan' => $this->plan,

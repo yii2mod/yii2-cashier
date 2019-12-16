@@ -493,6 +493,37 @@ $refund = $user->refund($invoice->charge);
 var_dump($refund->amount); // 1000
 ```
 
+Stripe's checkout UI
+------------
+
+Easy & quick checkout UI from Stripe to pay subscriptions. Needs a subscription plan ID from a valid subscription. The "controller_url_name" will be used to build url for user redirection, that controller should implement a 'success' & 'cancel' methods. You could add metadata additional info to store with the stripe's subscription. 
+
+```php
+StripeCheckoutSubsciption::widget([ 
+    'session' => $user->createCheckoutSessionForSubscription(
+        'STRIPE_PLAN_ID',
+        [
+            'controller_url_name' => 'stripe',
+            // 'client_reference_id' => $user->id, 
+            'metadata' => [
+                "student_id" => $user->id,
+                "student_name" => $student->name . ' ' . $student->surname,
+                "user_id" => $user->id,
+                "some_entity_id_from_other_table" => 777
+            ]
+        ])
+    ]
+);
+```
+
+If you set a an attribute mapping in your billable model, the webhook controller will save that data in $subscriptionModel->metadata_id . The mapping tie $subscriptionModel->metadata_id and the name of attribute sended in metadata checkout widget 
+```php
+use Billable;
+public static function billableMapMetadataAttributes()
+{
+    return [ 'metadata_id' => 'some_entity_id_from_other_table' ];
+}
+```
 
 Testing this extension
 ------------
@@ -510,10 +541,10 @@ Add a coupon named and with the same ID: coupon-1 of 5$
 
 Then, execute all tests with:
 ```bash
-STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests
+STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" STRIPE_PUB_KEY="YOUR_STRIPE_TEST_PUB_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests
 ```
 
 Then, execute single test with:
 ```bash
-STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests --filter testSubscriptionsCanBeCreated
+STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" STRIPE_PUB_KEY="YOUR_STRIPE_TEST_PUB_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests --filter testSubscriptionsCanBeCreated
 ```

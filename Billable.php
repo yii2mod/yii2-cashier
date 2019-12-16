@@ -34,15 +34,26 @@ trait Billable
     protected static $stripeKey;
 
     /**
+     * Mapping between attributes inside Stripe's metadata and a subscriptionModel attributes
+     * They will be updated by webhook controller , for example:  'metadata_id' => 'student_id'  
+     *
+     * @return Array
+     */
+    public static function billableMapMetadataAttributes()
+    {
+        return [];
+    }
+    
+    /**
      * Get the Stripe customer instance for the current user and token.
      * (copied from SubscriptionBuilder)
      *
      * @return \Stripe\Customer
      */
-    protected function getStripeCustomer()
+    public function getStripeCustomer($token=null)
     {
         if (!$this->stripe_id) {
-            $customer = $this->createAsStripeCustomer(null);
+            $customer = $this->createAsStripeCustomer($token);
         } else {
             $customer = $this->asStripeCustomer();
         }
@@ -71,6 +82,10 @@ trait Billable
         if(array_key_exists('controller_url_name', $optionsParam)){
             $controller_url_name = $optionsParam['controller_url_name'] . '/';
         }
+        $url_base = Url::base(true);
+        if(array_key_exists('url_base', $optionsParam)){
+            $url_base = $optionsParam['url_base'] . '/';
+        }
 
         $options = [
             'customer' => $this->stripe_id,
@@ -80,8 +95,8 @@ trait Billable
                 ['plan'=> $planID, 'quantity'=> 1]
               ],
             ],
-            'success_url' => Url::base(true) . '/' . $controller_url_name . 'success?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' =>  Url::base(true) . '/' . $controller_url_name . 'cancel',
+            'success_url' => $url_base . '/' . $controller_url_name . 'success?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' =>  $url_base . '/' . $controller_url_name . 'cancel',
         ];
 
         if(array_key_exists('success_url', $optionsParam)){
