@@ -492,3 +492,28 @@ $refund = $user->refund($invoice->charge);
 
 var_dump($refund->amount); // 1000
 ```
+
+
+Testing this extension
+------------
+
+Install dependencies:
+```php
+sudo apt install php-sqlite3 php-curl
+composer install --prefer-dist --no-scripts --no-autoloader && rm -rf /root/.composer && composer dump-autoload --no-scripts --optimize
+```
+
+Add to your Stripe account, in test mode, the following: 
+Add one subscripctions named (and with the same ID): main 
+Add one subscripction plans named (and with the same ID): monthly-10-1 and monthly-10-2 , price: 10$ , trialdays: 7
+Add a coupon named and with the same ID: coupon-1 of 5$
+
+Then, execute all tests with:
+```bash
+STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests
+```
+
+Then, execute single test with:
+```bash
+STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests --filter testSubscriptionsCanBeCreated
+```

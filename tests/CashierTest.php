@@ -83,12 +83,15 @@ class CashierTest extends TestCase
 
         // Invoice Tests
         $invoice = $user->invoices()[1];
-
+        $stripeSubscription = $subscription->asStripeSubscription();
         $this->assertEquals('$10.00', $invoice->total());
         $this->assertFalse($invoice->hasDiscount());
         $this->assertFalse($invoice->hasStartingBalance());
         $this->assertNull($invoice->coupon());
         $this->assertInstanceOf(Carbon::class, $invoice->date());
+
+        $this->assertEquals('1000', $invoice->total);
+        $this->assertTrue($stripeSubscription->discount==null);
     }
 
     public function testCreatingSubscriptionWithCoupons()
@@ -116,6 +119,13 @@ class CashierTest extends TestCase
         $this->assertEquals('$5.00', $invoice->total());
         $this->assertEquals('$5.00', $invoice->amountOff());
         $this->assertFalse($invoice->discountIsPercentage());
+
+        $this->assertTrue($invoice->discount!==null);
+        $this->assertEquals('500', $invoice->total);
+        $this->assertEquals('500', $invoice->amount_paid);
+
+        $stripeSubscription = $subscription->asStripeSubscription();
+        $this->assertTrue($stripeSubscription->discount->coupon->percent_off===null);
     }
 
     public function testGenericTrials()

@@ -422,9 +422,10 @@ trait Billable
     {
         $invoices = [];
 
-        $parameters = array_merge(['limit' => 24], $parameters);
+        $parameters = array_merge(['limit' => 24, 'customer' => $this->stripe_id], $parameters);
 
-        $stripeInvoices = $this->asStripeCustomer()->invoices($parameters);
+        \Stripe\Stripe::setApiKey(Yii::$app->params['stripe']['apiKey']);
+        $stripeInvoices = \Stripe\Invoice::all($parameters);
 
         // Here we will loop through the Stripe invoices and create our own custom Invoice
         // instances that have more helper methods and are generally more convenient to

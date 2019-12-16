@@ -54,9 +54,8 @@ class WebhookController extends Controller
      */
     public function actionHandleWebhook()
     {
-        file_put_contents('/tmp/last-stripe-payload.txt', Yii::$app->request->getRawBody(), FILE_APPEND );
+        // file_put_contents('/tmp/last-stripe-payload.txt', Yii::$app->request->getRawBody(), FILE_APPEND );
         $payload = json_decode(Yii::$app->request->getRawBody(), true);
-        $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
 
         if (!$this->eventExistsOnStripe($payload['id'])) {
             return;

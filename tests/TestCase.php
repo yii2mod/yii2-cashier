@@ -84,13 +84,15 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $db = Yii::$app->getDb();
 
         // Structure :
-
         $db->createCommand()->createTable('subscriptions', [
             'id' => 'pk',
             'user_id' => 'integer not null',
             'name' => 'string not null',
             'stripe_id' => 'string not null',
             'stripe_plan' => 'string not null',
+            'client_reference_id' => NULL,
+            'status' => NULL,
+            'metadata_id' => NULL,
             'quantity' => 'integer not null',
             'trial_ends_at' => 'timestamp null default null',
             'ends_at' => 'timestamp null default null',
