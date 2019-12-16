@@ -535,10 +535,9 @@ composer install --prefer-dist --no-scripts --no-autoloader && rm -rf /root/.com
 ```
 
 Add to your Stripe account, in test mode, the following: 
-
--Add one subscripctions named (and with the same ID): main 
--Add one subscripction plans named (and with the same ID): monthly-10-1 and monthly-10-2 , price: 10$ , trialdays: 7
--Add a coupon named and with the same ID: coupon-1 of 5$
+- Add one subscripctions named (and with the same ID): main 
+- Add one subscripction plans named (and with the same ID): monthly-10-1 and monthly-10-2 , price: 10$ , trialdays: 7
+- Add a coupon named and with the same ID: coupon-1 of 5$
 
 Then, execute all tests with:
 ```bash
