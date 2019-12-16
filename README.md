@@ -525,6 +525,10 @@ public static function billableMapMetadataAttributes()
 }
 ```
 
+The Webhook controller will save in your database a new subscription, only if you a new webhook in the stripe dashboard. Create a new webhook at developers/webhooks with the folowing information:
+- URL: Your webhoolk url, something like https://example-domain.com/webhook/handle-webhook
+- Event types: checkout.session.completed
+
 Testing this extension
 ------------
 
