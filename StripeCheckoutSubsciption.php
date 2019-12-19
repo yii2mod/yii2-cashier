@@ -26,10 +26,16 @@ class StripeCheckoutSubsciption extends \yii\base\Widget {
     protected static $stripePubKey;    
 
     /**
-     * Stripe's plan ID, from stripe admin
+     * Label of the button that starts stripe checkout
      * @var string plan ID
      */
-    public $plainId = "";
+    public $buttonlabel = "Subscribe";
+
+    /**
+     * Label of the button that starts stripe checkout
+     * @var string plan ID
+     */
+    public $buttonSuffixID = "";
 
     /**
      * Url redirect on success
@@ -56,6 +62,12 @@ class StripeCheckoutSubsciption extends \yii\base\Widget {
     public $session = null;
 
     /**
+     * Stripe session
+     * @var \Stripe\Checkout\Session
+     */
+    public $sessionId = null;
+
+    /**
      * @see Stripe's javascript location
      * @var string url to stripe's javascript
      */
@@ -78,11 +90,19 @@ class StripeCheckoutSubsciption extends \yii\base\Widget {
                     'src' => $this->stripeJs,
         ]);
         
-        echo $this->generateButton();
+        if($this->session!=null){
+            $this->sessionId = $this->session->id;
+        }
+
+        if($this->buttonSuffixID==''){
+            $this->buttonSuffixID = rand(1, 1000000); 
+        }
+        
+        echo $this->generateButton($this->buttonSuffixID, $this->buttonlabel);
         echo Html::script("
             (function() {
                 var stripe = Stripe('{$this->getStripePubKey()}');
-                var checkoutButton = document.getElementById('checkout-button-{$this->plainId}');
+                var checkoutButton = document.getElementById('checkout-button-{$this->buttonSuffixID}');
                 checkoutButton.addEventListener('click', function () {
                 // When the customer clicks on the button, redirect
                 // them to Checkout.
@@ -92,7 +112,7 @@ class StripeCheckoutSubsciption extends \yii\base\Widget {
                     // successUrl: 'https://your-website.com/success',
                     // cancelUrl: 'https://your-website.com/canceled',
 
-                    sessionId: '{$this->session->id}'
+                    sessionId: '{$this->sessionId}'
                 })
                 .then(function (result) {
                     if (result.error) {
@@ -116,10 +136,10 @@ class StripeCheckoutSubsciption extends \yii\base\Widget {
      * Will generate the stripe form
      * @return string the generated stripe's modal form
      */
-    private function generateButton() {
-        return Html::button(Yii::t('app', 'Subscribe'), [
+    private function generateButton($randElemIDsufix, $label) {
+        return Html::button(Yii::t('app', $label), [
             'class' => 'btn btn-primary btn-flat',
-            "id"    => "checkout-button-" . $this->plainId,
+            "id"    => "checkout-button-" . $randElemIDsufix,
             "role"    => "link"
         ]);
     }

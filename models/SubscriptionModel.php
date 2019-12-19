@@ -20,6 +20,7 @@ use yii2mod\behaviors\CarbonBehavior;
  * @property int $metadata_id
  * @property string $client_reference_id
  * @property int $quantity
+ * @property int $cancel_at_period_end
  * @property Carbon $trial_ends_at
  * @property Carbon $ends_at
  * @property int $created_at
@@ -57,7 +58,7 @@ class SubscriptionModel extends ActiveRecord
     {
         return [
             [['user_id', 'name', 'stripe_id', 'stripe_plan', 'quantity'], 'required'],
-            [['user_id', 'quantity', 'metadata_id'], 'integer'],
+            [['user_id', 'quantity', 'metadata_id', 'cancel_at_period_end'], 'integer'],
             [['trial_ends_at', 'ends_at'], 'safe'],
             [['name', 'stripe_id', 'stripe_plan', 'client_reference_id', 'status'], 'string', 'max' => 255],
         ];
@@ -78,6 +79,7 @@ class SubscriptionModel extends ActiveRecord
             'metadata_id' => Yii::t('app', 'Metadata ID'),
             'client_reference_id' => Yii::t('app', 'Client reference ID'),
             'quantity' => Yii::t('app', 'Quantity'),
+            'cancel_at_period_end' => Yii::t('app', 'Cancel at period end'),
             'trial_ends_at' => Yii::t('app', 'Trial End At'),
             'ends_at' => Yii::t('app', 'End At'),
             'created_at' => Yii::t('app', 'Created At'),
@@ -325,7 +327,7 @@ class SubscriptionModel extends ActiveRecord
 
         $subscription->cancel_at_period_end = true;
         $subscription->save();
-        
+
         // If the user was on trial, we will set the grace period to end when the trial
         // would have ended. Otherwise, we'll retrieve the end of the billing period
         // period and make that the end of the grace period for this current user.
@@ -337,6 +339,7 @@ class SubscriptionModel extends ActiveRecord
             );
         }
 
+        $this->cancel_at_period_end = (int)$subscription->cancel_at_period_end;
         $this->save();
 
         return $this;
@@ -381,6 +384,7 @@ class SubscriptionModel extends ActiveRecord
         }
 
         $subscription = $this->asStripeSubscription();
+        $subscription->cancel_at_period_end = false;
 
         // To resume the subscription we need to set the plan parameter on the Stripe
         // subscription object. This will force Stripe to resume this subscription
@@ -398,7 +402,14 @@ class SubscriptionModel extends ActiveRecord
         // Finally, we will remove the ending timestamp from the user's record in the
         // local database to indicate that the subscription is active again and is
         // no longer "cancelled". Then we will save this record in the database.
-        $this->ends_at = null;
+        // $this->ends_at = null;
+
+        $ends_at = null;
+        if($subscription->current_period_end!=null){
+            $ends_at = date("Y-m-d H:m:s", $subscription->current_period_end);
+        }
+        $this->ends_at = $ends_at;
+        $this->cancel_at_period_end = (int)$subscription->cancel_at_period_end;
         $this->save();
 
         return $this;

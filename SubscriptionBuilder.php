@@ -261,6 +261,7 @@ class SubscriptionBuilder
             'metadata_id' => $metadata_id,
             'client_reference_id' => $clientReferenceId,
             'quantity' => $stripeSubscription->quantity,
+            'cancel_at_period_end' => (int)$stripeSubscription->cancel_at_period_end,
             'trial_ends_at' => $trial_ends_at,
             'ends_at' => $ends_at,
         ]);

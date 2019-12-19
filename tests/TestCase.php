@@ -95,6 +95,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'status' => NULL,
             'metadata_id' => NULL,
             'quantity' => 'integer not null',
+            'cancel_at_period_end' => 'integer default null',
             'trial_ends_at' => 'timestamp null default null',
             'ends_at' => 'timestamp null default null',
             'created_at' => 'timestamp null default null',

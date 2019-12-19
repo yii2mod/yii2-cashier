@@ -58,7 +58,7 @@ class CashierTest extends TestCase
         $subscription->updateAttributes(['ends_at' => Carbon::now()->subDays(5)]);
 
         $this->assertFalse($subscription->active());
-        $this->assertTrue($subscription->cancelled());
+        $this->assertFalse($subscription->cancelled());
         $this->assertFalse($subscription->onGracePeriod());
         $subscription->updateAttributes(['ends_at' => $oldGracePeriod]);
 
@@ -261,16 +261,18 @@ class CashierTest extends TestCase
                 ]
             ]
         );
+        $buttonSuffixID = '8888';
         $out = StripeCheckoutSubsciption::widget([
-            'session' => $session
+            'session' => $session,
+            'buttonSuffixID' => '8888'
         ]);
-        $apiKey = Yii::$app->params['stripe']['pubKey'];
+        $apiKey = Yii::$app->params['stripe']['pubKey'];    
         
         $expected = <<<EOT
-<script src="https://js.stripe.com/v3"></script><button type="button" id="checkout-button-" class="btn btn-primary btn-flat" role="link">Subscribe</button><script defer>
+<script src="https://js.stripe.com/v3"></script><button type="button" id="checkout-button-$buttonSuffixID" class="btn btn-primary btn-flat" role="link">Subscribe</button><script defer>
             (function() {
                 var stripe = Stripe('$apiKey');
-                var checkoutButton = document.getElementById('checkout-button-');
+                var checkoutButton = document.getElementById('checkout-button-$buttonSuffixID');
                 checkoutButton.addEventListener('click', function () {
                 // When the customer clicks on the button, redirect
                 // them to Checkout.
