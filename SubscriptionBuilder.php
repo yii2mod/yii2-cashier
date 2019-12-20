@@ -233,8 +233,9 @@ class SubscriptionBuilder
         }
     
         $ends_at = null;
+        $current_period_end = null;
         if($stripeSubscription->current_period_end!=null){
-            $ends_at = date("Y-m-d H:m:s", $stripeSubscription->current_period_end);
+            $current_period_end = date("Y-m-d H:m:s", $stripeSubscription->current_period_end);
         }
 
         $metadataMap = $this->user->billableMapMetadataAttributes();
@@ -262,6 +263,7 @@ class SubscriptionBuilder
             'client_reference_id' => $clientReferenceId,
             'quantity' => $stripeSubscription->quantity,
             'cancel_at_period_end' => (int)$stripeSubscription->cancel_at_period_end,
+            'current_period_end' => $current_period_end,
             'trial_ends_at' => $trial_ends_at,
             'ends_at' => $ends_at,
         ]);

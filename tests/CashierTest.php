@@ -58,7 +58,7 @@ class CashierTest extends TestCase
         $subscription->updateAttributes(['ends_at' => Carbon::now()->subDays(5)]);
 
         $this->assertFalse($subscription->active());
-        $this->assertFalse($subscription->cancelled());
+        $this->assertTrue($subscription->cancelled());
         $this->assertFalse($subscription->onGracePeriod());
         $subscription->updateAttributes(['ends_at' => $oldGracePeriod]);
 

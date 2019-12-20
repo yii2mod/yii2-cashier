@@ -21,6 +21,7 @@ use yii2mod\behaviors\CarbonBehavior;
  * @property string $client_reference_id
  * @property int $quantity
  * @property int $cancel_at_period_end
+ * @property int $current_period_end
  * @property Carbon $trial_ends_at
  * @property Carbon $ends_at
  * @property int $created_at
@@ -80,6 +81,7 @@ class SubscriptionModel extends ActiveRecord
             'client_reference_id' => Yii::t('app', 'Client reference ID'),
             'quantity' => Yii::t('app', 'Quantity'),
             'cancel_at_period_end' => Yii::t('app', 'Cancel at period end'),
+            'current_period_end' => Yii::t('app', 'Current period end date'),
             'trial_ends_at' => Yii::t('app', 'Trial End At'),
             'ends_at' => Yii::t('app', 'End At'),
             'created_at' => Yii::t('app', 'Created At'),
@@ -402,13 +404,13 @@ class SubscriptionModel extends ActiveRecord
         // Finally, we will remove the ending timestamp from the user's record in the
         // local database to indicate that the subscription is active again and is
         // no longer "cancelled". Then we will save this record in the database.
-        // $this->ends_at = null;
+        $this->ends_at = null;
 
-        $ends_at = null;
+        $current_period_end = null;
         if($subscription->current_period_end!=null){
-            $ends_at = date("Y-m-d H:m:s", $subscription->current_period_end);
+            $current_period_end = date("Y-m-d H:m:s", $subscription->current_period_end);
         }
-        $this->ends_at = $ends_at;
+        $this->current_period_end = $current_period_end;
         $this->cancel_at_period_end = (int)$subscription->cancel_at_period_end;
         $this->save();
 
