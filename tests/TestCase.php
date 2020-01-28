@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
  */
 class TestCase extends \PHPUnit\Framework\TestCase
 {
-    protected function setUp()
+    protected function setUp() :void
     {
         parent::setUp();
 
@@ -18,7 +18,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $this->setupTestDbData();
     }
 
-    protected function tearDown()
+    protected function tearDown() :void
     {
         $this->destroyApplication();
     }
