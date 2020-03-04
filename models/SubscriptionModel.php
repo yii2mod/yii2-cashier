@@ -58,7 +58,7 @@ class SubscriptionModel extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['user_id', 'name', 'stripe_id', 'stripe_plan', 'quantity'], 'required'],
+            [['user_id', 'name', 'stripe_id', 'stripe_plan', 'quantity', 'current_period_end', 'cancel_at_period_end'], 'required'],
             [['user_id', 'quantity', 'metadata_id', 'cancel_at_period_end'], 'integer'],
             [['trial_ends_at', 'ends_at'], 'safe'],
             [['name', 'stripe_id', 'stripe_plan', 'client_reference_id', 'status'], 'string', 'max' => 255],
