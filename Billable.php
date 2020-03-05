@@ -234,18 +234,20 @@ trait Billable
     /**
      * Create a new subscription from checkout params.
      *
-     * @param stirng $stripe_id costumer ID
+     * @param array $conditions https://stripe.com/docs/api/subscriptions/list
      *
      * @return Boolean
      */
-    public function updateSubscriptionModels()
+    public function updateSubscriptionModels($conditions = array())
     {
         if (!$this->stripe_id) {
             return false;
         }
 
+        $conditions['customer'] = $this->stripe_id;
         \Stripe\Stripe::setApiKey(Yii::$app->params['stripe']['apiKey']);
-        $stripeSubscriptions = \Stripe\Subscription::all(['customer' => $this->stripe_id]) ;
+        $stripeSubscriptions = \Stripe\Subscription::all($conditions) ;
+
         foreach ($stripeSubscriptions as $stripeSubscription) {
             $subscriptionBuilder = new SubscriptionBuilder($this, '', '');
             $subscriptionBuilder->updateSubscriptionModel($stripeSubscription, null);
@@ -320,6 +322,18 @@ trait Billable
     public function subscription(string $subscription = 'default'): ?SubscriptionModel
     {
         return $this->getSubscriptions()->where(['name' => $subscription])->one();
+    }
+
+    /**
+     * Get a subscription instance by conditions.
+     *
+     * @param array $conditions
+     *
+     * @return SubscriptionModel|null
+     */
+    public function subscriptionByConditions($conditions): ?SubscriptionModel
+    {
+        return $this->getSubscriptions()->where($conditions)->one();
     }
 
     /**
