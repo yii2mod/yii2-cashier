@@ -95,8 +95,8 @@ trait Billable
                 ['plan'=> $planID, 'quantity'=> 1]
               ],
             ],
-            'success_url' => $url_base . '/' . $controller_url_name . 'success?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' =>  $url_base . '/' . $controller_url_name . 'cancel',
+            'success_url' => $url_base . $controller_url_name . 'success?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' =>  $url_base . $controller_url_name . 'cancel',
         ];
 
         if(array_key_exists('success_url', $optionsParam)){
@@ -346,6 +346,17 @@ trait Billable
     public function subscriptionByStripeID(string $stripe_id = 'default'): ?SubscriptionModel
     {
         return $this->getSubscriptions()->where(['stripe_id' => $stripe_id])->one();
+    }
+
+    /**
+     * Get a subscription instance by name.
+     *
+     * @param string $subscription
+     *
+     * @return SubscriptionModel|null
+     */
+    public static function subscriptionOnlyByStripeID($stripe_id){
+        return SubscriptionModel::find()->where(['stripe_id'=> $stripe_id])->one();    
     }
 
     /**

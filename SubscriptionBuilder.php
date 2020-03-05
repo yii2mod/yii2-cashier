@@ -195,7 +195,7 @@ class SubscriptionBuilder
         if ($subscriptionModel->save()) {
             return $subscriptionModel;
         } else {
-            throw new Exception('Subscription was not saved.');
+            throw new Exception('Subscription was not saved. ' . $subscriptionModel->getFirstError(key($subscriptionModel->getErrors())) );
         }
     }
 
@@ -270,7 +270,7 @@ class SubscriptionBuilder
         if ($subscriptionModel->save()) {
             return $subscriptionModel;
         } else {
-            throw new Exception('Subscription was not saved.');
+            throw new Exception('Subscription was not saved. ' . $subscriptionModel->getFirstError(key($subscriptionModel->getErrors())) );
         }
     }
 
