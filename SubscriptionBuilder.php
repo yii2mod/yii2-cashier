@@ -2,6 +2,7 @@
 
 namespace yii2mod\cashier;
 
+use Yii;
 use Carbon\Carbon;
 use yii\base\Exception;
 use yii2mod\cashier\models\SubscriptionModel;
@@ -194,7 +195,82 @@ class SubscriptionBuilder
         if ($subscriptionModel->save()) {
             return $subscriptionModel;
         } else {
-            throw new Exception('Subscription was not saved.');
+            throw new Exception('Subscription was not saved. ' . $subscriptionModel->getFirstError(key($subscriptionModel->getErrors())) );
+        }
+    }
+
+    /**
+     * Loads or updates an Stripe subscription.
+     *
+     * @param string $subscriptionID
+     *
+     * @return SubscriptionModel
+     *
+     * @throws Exception
+     */
+    public function loadSubscriptionModel($subscriptionID, $clientReferenceId=null)
+    {
+        $customer = $this->getStripeCustomer();
+        $stripeSubscription = \Stripe\Subscription::retrieve($subscriptionID, Yii::$app->params['stripe']['apiKey']);
+        return $this->updateSubscriptionModel($stripeSubscription, $clientReferenceId);
+    }
+
+    /**
+     * Loads or updates an Stripe subscription.
+     *
+     * @param string $subscriptionID
+     *
+     * @return SubscriptionModel
+     *
+     * @throws Exception
+     */
+    public function updateSubscriptionModel($stripeSubscription, $clientReferenceId=null)
+    {
+        // precalculate attributes
+        $trial_ends_at = null;
+        if($stripeSubscription->trial_end!=null){
+            $trial_ends_at = date("Y-m-d H:m:s", $stripeSubscription->trial_end);
+        }
+    
+        $ends_at = null;
+        $current_period_end = null;
+        if($stripeSubscription->current_period_end!=null){
+            $current_period_end = date("Y-m-d H:m:s", $stripeSubscription->current_period_end);
+        }
+
+        $metadataMap = $this->user->billableMapMetadataAttributes();
+        $metadata_id = null;
+        if(array_key_exists('metadata_id', $metadataMap) && $stripeSubscription->metadata->offsetExists($metadataMap['metadata_id'])){
+            $metadata_id = $stripeSubscription->metadata->{$metadataMap['metadata_id']};
+        }
+        
+        // instace creation or update
+        $subscriptionModel = SubscriptionModel::find()->where(['stripe_id' => $stripeSubscription->id])->one();
+        if($subscriptionModel==null){
+            $subscriptionModel = new SubscriptionModel();
+        }
+        else{
+            $clientReferenceId = $subscriptionModel->client_reference_id;
+        }
+
+        $subscriptionModel->setAttributes([
+            'user_id' => $this->user->id,
+            'name' => $stripeSubscription->plan->product,
+            'stripe_id' => $stripeSubscription->id,
+            'stripe_plan' => $stripeSubscription->plan->id,
+            'status' => $stripeSubscription->status,
+            'metadata_id' => $metadata_id,
+            'client_reference_id' => $clientReferenceId,
+            'quantity' => $stripeSubscription->quantity,
+            'cancel_at_period_end' => (int)$stripeSubscription->cancel_at_period_end,
+            'current_period_end' => $current_period_end,
+            'trial_ends_at' => $trial_ends_at,
+            'ends_at' => $ends_at,
+        ]);
+        if ($subscriptionModel->save()) {
+            return $subscriptionModel;
+        } else {
+            throw new Exception('Subscription was not saved. ' . $subscriptionModel->getFirstError(key($subscriptionModel->getErrors())) );
         }
     }
 
@@ -227,7 +303,7 @@ class SubscriptionBuilder
      *
      * @return array
      */
-    protected function buildPayload()
+    public function buildPayload()
     {
         return array_filter([
             'plan' => $this->plan,

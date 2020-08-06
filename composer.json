@@ -17,14 +17,14 @@
     "require": {
         "php": ">=7.2",
         "yiisoft/yii2": "~2.0.14",
-        "yii2mod/yii2-behaviors": "*",
-        "stripe/stripe-php": "~4.0",
-        "nesbot/carbon": "~1.0",
+        "yii2mod/yii2-behaviors": "~2.0",
+        "stripe/stripe-php": "~7.0",
+        "nesbot/carbon": "~2.29.1",
         "dompdf/dompdf": "^0.8.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "~2.0",
-        "phpunit/phpunit": "~7.0"
+        "phpunit/phpunit": "~8.5.2"
         
     },
     "autoload": {

@@ -14,6 +14,15 @@ use yii2mod\cashier\models\SubscriptionModel;
 /**
  * Class WebhookController
  *
+ * Based on:
+ * 
+ * Payment proccess:
+ * https://stripe.com/docs/payments/checkout/fulfillment#webhooks
+ * 
+ * Request verification:
+ * https://stackoverflow.com/a/48694589
+ * https://stripe.com/docs/webhooks/signatures
+ * 
  * @package yii2mod\cashier\controllers
  */
 class WebhookController extends Controller
@@ -45,6 +54,7 @@ class WebhookController extends Controller
      */
     public function actionHandleWebhook()
     {
+        // file_put_contents('/tmp/last-stripe-payload.txt', Yii::$app->request->getRawBody(), FILE_APPEND );
         $payload = json_decode(Yii::$app->request->getRawBody(), true);
 
         if (!$this->eventExistsOnStripe($payload['id'])) {
@@ -76,6 +86,32 @@ class WebhookController extends Controller
             foreach ($subscriptions as $subscription) {
                 if ($subscription->stripe_id === $payload['data']['object']['id']) {
                     $subscription->markAsCancelled();
+                }
+            }
+        }
+
+        return new Response([
+            'statusCode' => 200,
+            'statusText' => 'Webhook Handled',
+        ]);
+    }
+
+    /**
+     * Handle a cancelled customer from a Stripe subscription.
+     *
+     * @param array $payload
+     *
+     * @return Response
+     */
+    protected function handleCheckoutSessionCompleted(array $payload)
+    {
+        $user = $this->getUserByStripeId($payload['data']['object']['customer']);
+        if ($user) {
+            $dataObj = $payload['data']['object'];
+            if($dataObj['mode']=="subscription"){
+                $subscriptionModel = $user->subscriptionByStripeID($dataObj['subscription']);
+                if (!$subscriptionModel) {
+                    $subscriptionModel = $user->loadSubscriptionModel($dataObj['subscription'], $dataObj['client_reference_id']);
                 }
             }
         }
@@ -124,7 +160,7 @@ class WebhookController extends Controller
     public function missingMethod()
     {
         return new Response([
-            'statusCode' => 200,
+            'statusCode' => 400,
         ]);
     }
 }

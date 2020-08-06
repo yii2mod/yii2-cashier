@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
  */
 class TestCase extends \PHPUnit\Framework\TestCase
 {
-    protected function setUp()
+    protected function setUp() :void
     {
         parent::setUp();
 
@@ -18,7 +18,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $this->setupTestDbData();
     }
 
-    protected function tearDown()
+    protected function tearDown() :void
     {
         $this->destroyApplication();
     }
@@ -55,6 +55,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'params' => [
                 'stripe' => [
                     'apiKey' => getenv('STRIPE_SECRET'),
+                    'pubKey' => getenv('STRIPE_PUB_KEY'),
                 ],
             ],
         ], $config));
@@ -84,14 +85,18 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $db = Yii::$app->getDb();
 
         // Structure :
-
         $db->createCommand()->createTable('subscriptions', [
             'id' => 'pk',
             'user_id' => 'integer not null',
             'name' => 'string not null',
             'stripe_id' => 'string not null',
             'stripe_plan' => 'string not null',
+            'client_reference_id' => NULL,
+            'status' => NULL,
+            'metadata_id' => NULL,
             'quantity' => 'integer not null',
+            'cancel_at_period_end' => 'integer default null',
+            'current_period_end' => 'timestamp null default null',
             'trial_ends_at' => 'timestamp null default null',
             'ends_at' => 'timestamp null default null',
             'created_at' => 'timestamp null default null',

@@ -95,6 +95,7 @@ Next, you should configure your params section in your configuration file:
 'params' => [
         .....
         'stripe' => [
+            'pubKey' => 'Your Publishable Api Key for Stripe Checkout',
             'apiKey' => 'Your Secret Api Key'
         ],
     ],
@@ -490,4 +491,64 @@ $invoice = $user->invoiceFor('Invoice Description', 1000);
 $refund = $user->refund($invoice->charge);
 
 var_dump($refund->amount); // 1000
+```
+
+Stripe's checkout UI
+------------
+
+Easy & quick checkout UI from Stripe to pay subscriptions. Needs a subscription plan ID from a valid subscription. The "controller_url_name" will be used to build url for user redirection, that controller should implement a 'success' & 'cancel' methods. You could add metadata additional info to store with the stripe's subscription. 
+
+```php
+StripeCheckoutSubsciption::widget([ 
+    'session' => $user->createCheckoutSessionForSubscription(
+        'STRIPE_PLAN_ID',
+        [
+            'controller_url_name' => 'stripe',
+            // 'client_reference_id' => $user->id, 
+            'metadata' => [
+                "student_id" => $user->id,
+                "student_name" => $student->name . ' ' . $student->surname,
+                "user_id" => $user->id,
+                "some_entity_id_from_other_table" => 777
+            ]
+        ])
+    ]
+);
+```
+
+If you set a an attribute mapping in your billable model, the webhook controller will save that data in $subscriptionModel->metadata_id . The mapping tie $subscriptionModel->metadata_id and the name of attribute sended in metadata checkout widget 
+```php
+use Billable;
+public static function billableMapMetadataAttributes()
+{
+    return [ 'metadata_id' => 'some_entity_id_from_other_table' ];
+}
+```
+
+The Webhook controller will save in your database a new subscription, only if you create a new webhook in the stripe dashboard. Create a new webhook at developers/webhooks with the folowing information:
+- URL: Your webhoolk url, something like https://example-domain.com/webhook/handle-webhook
+- Event types: checkout.session.completed
+
+Testing this extension
+------------
+
+Install dependencies:
+```php
+sudo apt install php-sqlite3 php-curl
+composer install --prefer-dist --no-scripts --no-autoloader && rm -rf /root/.composer && composer dump-autoload --no-scripts --optimize
+```
+
+Add to your Stripe account, in test mode, the following: 
+- Add one subscripctions named (and with the same ID): main 
+- Add one subscripction plans named (and with the same ID): monthly-10-1 and monthly-10-2 , price: 10$ , trialdays: 7
+- Add a coupon named and with the same ID: coupon-1 of 5$
+
+Then, execute all tests with:
+```bash
+STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" STRIPE_PUB_KEY="YOUR_STRIPE_TEST_PUB_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests
+```
+
+Then, execute single test with:
+```bash
+STRIPE_SECRET="YOUR_STRIPE_TEST_SECRET_KEY" STRIPE_PUB_KEY="YOUR_STRIPE_TEST_PUB_KEY" vendor/phpunit/phpunit/phpunit -v --bootstrap tests/bootstrap.php tests --filter testSubscriptionsCanBeCreated
 ```

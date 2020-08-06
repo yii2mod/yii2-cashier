@@ -14,6 +14,10 @@ use yii2mod\cashier\Billable;
 class User extends ActiveRecord implements IdentityInterface
 {
     use Billable;
+    public static function billableMapMetadataAttributes()
+    {
+        return [ 'metadata_id' => 'some_entity_id_from_other_table' ];
+    }
 
     /**
      * @inheritdoc
