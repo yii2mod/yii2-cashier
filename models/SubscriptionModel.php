@@ -17,11 +17,7 @@ use yii2mod\behaviors\CarbonBehavior;
  * @property string $name
  * @property string $stripe_id
  * @property string $stripe_plan
- * @property int $metadata_id
- * @property string $client_reference_id
  * @property int $quantity
- * @property int $cancel_at_period_end
- * @property int $current_period_end
  * @property Carbon $trial_ends_at
  * @property Carbon $ends_at
  * @property int $created_at
@@ -58,10 +54,10 @@ class SubscriptionModel extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['user_id', 'name', 'stripe_id', 'stripe_plan', 'quantity'], 'required'], 
-            [['user_id', 'quantity', 'metadata_id', 'cancel_at_period_end'], 'integer'],
-            [['trial_ends_at', 'ends_at', 'current_period_end'], 'safe'],
-            [['name', 'stripe_id', 'stripe_plan', 'client_reference_id', 'status'], 'string', 'max' => 255],
+            [['user_id', 'name', 'stripe_id', 'stripe_plan', 'quantity'], 'required'],
+            [['user_id', 'quantity'], 'integer'],
+            [['trial_ends_at', 'ends_at'], 'safe'],
+            [['name', 'stripe_id', 'stripe_plan'], 'string', 'max' => 255],
         ];
     }
 
@@ -76,12 +72,7 @@ class SubscriptionModel extends ActiveRecord
             'name' => Yii::t('app', 'Name'),
             'stripe_id' => Yii::t('app', 'Stripe ID'),
             'stripe_plan' => Yii::t('app', 'Stripe Plan'),
-            'status' => Yii::t('app', 'Status'),
-            'metadata_id' => Yii::t('app', 'Metadata ID'),
-            'client_reference_id' => Yii::t('app', 'Client reference ID'),
             'quantity' => Yii::t('app', 'Quantity'),
-            'cancel_at_period_end' => Yii::t('app', 'Cancel at period end'),
-            'current_period_end' => Yii::t('app', 'Current period end date'),
             'trial_ends_at' => Yii::t('app', 'Trial End At'),
             'ends_at' => Yii::t('app', 'End At'),
             'created_at' => Yii::t('app', 'Created At'),
@@ -327,8 +318,7 @@ class SubscriptionModel extends ActiveRecord
     {
         $subscription = $this->asStripeSubscription();
 
-        $subscription->cancel_at_period_end = true;
-        $subscription->save();
+        $subscription->cancel(['at_period_end' => true]);
 
         // If the user was on trial, we will set the grace period to end when the trial
         // would have ended. Otherwise, we'll retrieve the end of the billing period
@@ -341,7 +331,6 @@ class SubscriptionModel extends ActiveRecord
             );
         }
 
-        $this->cancel_at_period_end = (int)$subscription->cancel_at_period_end;
         $this->save();
 
         return $this;
@@ -386,7 +375,6 @@ class SubscriptionModel extends ActiveRecord
         }
 
         $subscription = $this->asStripeSubscription();
-        $subscription->cancel_at_period_end = false;
 
         // To resume the subscription we need to set the plan parameter on the Stripe
         // subscription object. This will force Stripe to resume this subscription
@@ -405,13 +393,6 @@ class SubscriptionModel extends ActiveRecord
         // local database to indicate that the subscription is active again and is
         // no longer "cancelled". Then we will save this record in the database.
         $this->ends_at = null;
-
-        $current_period_end = null;
-        if($subscription->current_period_end!=null){
-            $current_period_end = date("Y-m-d H:m:s", $subscription->current_period_end);
-        }
-        $this->current_period_end = $current_period_end;
-        $this->cancel_at_period_end = (int)$subscription->cancel_at_period_end;
         $this->save();
 
         return $this;
