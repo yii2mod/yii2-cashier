@@ -7,8 +7,6 @@ use Stripe\Token;
 use Yii;
 use yii2mod\cashier\tests\data\CashierTestControllerStub;
 use yii2mod\cashier\tests\data\User;
-use yii2mod\cashier\StripeCheckoutSubsciption;
-use yii2mod\cashier\SubscriptionBuilder;
 
 class CashierTest extends TestCase
 {
@@ -85,15 +83,12 @@ class CashierTest extends TestCase
 
         // Invoice Tests
         $invoice = $user->invoices()[1];
-        $stripeSubscription = $subscription->asStripeSubscription();
+
         $this->assertEquals('$10.00', $invoice->total());
         $this->assertFalse($invoice->hasDiscount());
         $this->assertFalse($invoice->hasStartingBalance());
         $this->assertNull($invoice->coupon());
         $this->assertInstanceOf(Carbon::class, $invoice->date());
-
-        $this->assertEquals('1000', $invoice->total);
-        $this->assertTrue($stripeSubscription->discount==null);
     }
 
     public function testCreatingSubscriptionWithCoupons()
@@ -121,13 +116,6 @@ class CashierTest extends TestCase
         $this->assertEquals('$5.00', $invoice->total());
         $this->assertEquals('$5.00', $invoice->amountOff());
         $this->assertFalse($invoice->discountIsPercentage());
-
-        $this->assertTrue($invoice->discount!==null);
-        $this->assertEquals('500', $invoice->total);
-        $this->assertEquals('500', $invoice->amount_paid);
-
-        $stripeSubscription = $subscription->asStripeSubscription();
-        $this->assertTrue($stripeSubscription->discount->coupon->percent_off===null);
     }
 
     public function testGenericTrials()
@@ -243,114 +231,5 @@ class CashierTest extends TestCase
 
         // Refund Tests
         $this->assertEquals(1000, $refund->amount);
-    }
-
-    public function testSessionAndStripeCheckoutWidget()
-    {
-        $user = User::findOne(['email' => 'johndoe@domain.com']);
-        $session = $user->createCheckoutSessionForSubscription(
-            'monthly-10-1',
-            [
-                'url_base' => 'http://localhost',
-                'controller_url_name' => 'stripe',
-                'client_reference_id' => 999,
-                'metadata' => [
-                    "student_id" => 666,
-                    "student_name" => 'name surname',
-                    "user_id" => 999,
-                ]
-            ]
-        );
-        $buttonSuffixID = '8888';
-        $out = StripeCheckoutSubsciption::widget([
-            'session' => $session,
-            'buttonSuffixID' => '8888'
-        ]);
-        $apiKey = Yii::$app->params['stripe']['pubKey'];    
-        
-        $expected = <<<EOT
-<script src="https://js.stripe.com/v3"></script><button type="button" id="checkout-button-$buttonSuffixID" class="btn btn-primary btn-flat" role="link">Subscribe</button><script defer>
-            (function() {
-                var stripe = Stripe('$apiKey');
-                var checkoutButton = document.getElementById('checkout-button-$buttonSuffixID');
-                checkoutButton.addEventListener('click', function () {
-                // When the customer clicks on the button, redirect
-                // them to Checkout.
-                stripe.redirectToCheckout({
-                    // Instead use one of the strategies described in
-                    // https://stripe.com/docs/payments/checkout/fulfillment
-                    // successUrl: 'https://your-website.com/success',
-                    // cancelUrl: 'https://your-website.com/canceled',
-
-                    sessionId: '$session->id'
-                })
-                .then(function (result) {
-                    if (result.error) {
-                    // If `redirectToCheckout` fails due to a browser or network
-                    // error, display the localized error message to your customer.
-                    var displayError = document.getElementById('stripe-checkout-error-message');
-                    displayError.textContent = result.error.message;
-                    }
-                });
-                });
-            })();
-        </script><div id="stripe-checkout-error-message" role="alert"></div>
-EOT;
-
-        $this->assertEquals($expected, $out);
-    }
-
-    public function testCreateSubscriptionFromWebhookUsingStripeCheckout()
-    {
-        $user = User::findOne(['email' => 'johndoe@domain.com']);        
-        // $user->newSubscription('main', 'monthly-10-1')->create($this->getTestToken());
-
-        $customer = $user->getStripeCustomer($this->getTestToken());
-        $subscriptionBuilder = new SubscriptionBuilder($user, 'main', 'monthly-10-1');        
-
-        $payload = $subscriptionBuilder->buildPayload();
-        $payload["metadata"] = [
-            "student_id" => "1017",
-            "student_name" =>  "name surname",
-            "user_id" => "888",
-            "some_entity_id_from_other_table" => 777
-        ];
-        $subscription = $customer->subscriptions->create($payload);
-        
-        // $user->newSubscription('main', 'monthly-10-1')
-        //     ->create($this->getTestToken());
-
-        // $subscription = $user->subscription('main');
-
-        Yii::$app->request->rawBody = json_encode([
-            'id' => 'foo',
-            "type" => "checkout.session.completed",
-            'data' => [
-                'object' => [
-                    'customer' => $user->stripe_id,
-                    "mode" => "subscription",
-                    'client_reference_id' => 'some string id',
-                    'name' => 'monthly-10-1',
-                    'subscription' => $subscription->id
-                ],
-            ],
-        ]);
-        $controller = new CashierTestControllerStub('webhook', Yii::$app);
-        $response = $controller->actionHandleWebhook();
-        $this->assertEquals(200, $response->getStatusCode());
-
-        $user->refresh();
-        $subscriptionModel = $user->subscription($subscription->plan->product);
-
-        // doing again does not creates a new one
-        $controller = new CashierTestControllerStub('webhook', Yii::$app);
-        $response = $controller->actionHandleWebhook();
-        $this->assertEquals(200, $response->getStatusCode());
-
-        $this->assertEquals($subscription->id, $subscriptionModel->stripe_id);
-        $this->assertEquals(777, $subscriptionModel->metadata_id);
-
-        $updatedSubscriptionModel = $subscriptionBuilder->loadSubscriptionModel($subscriptionModel->stripe_id);
-        $this->assertEquals(777, $updatedSubscriptionModel->metadata_id);
     }
 }
