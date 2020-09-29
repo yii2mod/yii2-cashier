@@ -99,6 +99,10 @@ trait Billable
             'cancel_url' =>  $url_base . $controller_url_name . 'cancel',
         ];
 
+        if(array_key_exists('couponID', $optionsParam)){
+            $options['subscription_data']['coupon'] = $optionsParam['couponID'] ;
+        }
+
         if(array_key_exists('success_url', $optionsParam)){
             $options['success_url'] = $optionsParam['success_url'];
         }
@@ -117,6 +121,40 @@ trait Billable
         // }
 
         $session = \Stripe\Checkout\Session::create($options, ['api_key' => $this->getStripeKey()] );
+        return $session;
+    }
+
+    /**
+     * Logic code for Yii app. To be overwritten
+     */
+    public function handlerAfterSubscriptionsUpdated(): void
+    {
+        
+    }
+
+    /**
+     * Creates a Stripe's customer portal session and get and url to redirect
+     *
+     * @param array $options['return_url'] url to return after customer portal
+     *
+     * @return \Stripe\Checkout\Session
+     *
+     * @throws Card
+     */
+    public function createCustomerPortalSession( array $optionsParam = []): \Stripe\BillingPortal\Session
+    {
+        $customer = $this->getStripeCustomer();
+        if (!$this->stripe_id) {
+            throw new InvalidArgumentException('No stripe customer provided.');
+        }
+
+        $options = [ 'customer' =>  $this->stripe_id ];
+        if(array_key_exists('return_url', $optionsParam)){
+            $options['return_url'] =  $optionsParam['return_url'];
+        }
+
+        \Stripe\Stripe::setApiKey(Yii::$app->params['stripe']['apiKey']);
+        $session = \Stripe\BillingPortal\Session::create($options);
         return $session;
     }
 

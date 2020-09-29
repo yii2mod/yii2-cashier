@@ -81,12 +81,17 @@ class WebhookController extends Controller
     {
         $user = $this->getUserByStripeId($payload['data']['object']['customer']);
         if ($user) {
+            $hasUpdated = false;
             $subscriptions = $user->getSubscriptions()->all();
             /* @var $subscription SubscriptionModel */
             foreach ($subscriptions as $subscription) {
                 if ($subscription->stripe_id === $payload['data']['object']['id']) {
                     $subscription->markAsCancelled();
+                    $hasUpdated = true;
                 }
+            }
+            if($hasUpdated){
+                $user->handlerAfterSubscriptionsUpdated();
             }
         }
 
@@ -112,6 +117,7 @@ class WebhookController extends Controller
                 $subscriptionModel = $user->subscriptionByStripeID($dataObj['subscription']);
                 if (!$subscriptionModel) {
                     $subscriptionModel = $user->loadSubscriptionModel($dataObj['subscription'], $dataObj['client_reference_id']);
+                    $user->handlerAfterSubscriptionsUpdated();
                 }
             }
         }
