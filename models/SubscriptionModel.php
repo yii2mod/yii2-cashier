@@ -7,7 +7,12 @@ use DateTimeInterface;
 use LogicException;
 use Yii;
 use yii\db\ActiveRecord;
-use yii2mod\behaviors\CarbonBehavior;
+
+// OLD lib
+// from composer.json => "yii2mod/yii2-behaviors": "~2.0",
+// use yii2mod\behaviors\CarbonBehavior;
+
+use yii2mod\cashier\behaviors\CarbonBehavior;
 
 /**
  * This is the model class for table "subscriptions".
