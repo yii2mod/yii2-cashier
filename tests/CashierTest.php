@@ -18,7 +18,7 @@ class CashierTest extends TestCase
             'card' => [
                 'number' => '4242424242424242',
                 'exp_month' => 5,
-                'exp_year' => 2020,
+                'exp_year' => 2032,
                 'cvc' => '123',
             ],
         ], ['api_key' => Yii::$app->params['stripe']['apiKey']])->id;
